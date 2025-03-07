@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/all_robots_overlay.png" alt="banner" height="400">
+  <img src="./assets/banner_light.png" alt="banner" height="400">
 </p>
 
 # CU-MULTI Dataset
