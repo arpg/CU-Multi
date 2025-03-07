@@ -1,4 +1,4 @@
-![banner](./assets/platform.png)
+![banner](./assets/all_robots_overlay.png)
 
 # CU-MULTI Dataset
 
