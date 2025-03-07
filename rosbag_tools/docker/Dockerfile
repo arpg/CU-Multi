@@ -1,0 +1,129 @@
+# Use ROS Noetic as base image
+FROM nvidia/cuda:12.3.1-base-ubuntu20.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# install packages
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# setup keys
+RUN set -eux; \
+       key='C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'; \
+       export GNUPGHOME="$(mktemp -d)"; \
+       gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+       mkdir -p /usr/share/keyrings; \
+       gpg --batch --export "$key" > /usr/share/keyrings/ros1-latest-archive-keyring.gpg; \
+       gpgconf --kill all; \
+       rm -rf "$GNUPGHOME"
+
+
+# setup sources.list
+RUN echo "deb [ signed-by=/usr/share/keyrings/ros1-latest-archive-keyring.gpg ] http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+ENV ROS_DISTRO noetic
+
+# install ros packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-ros-core=1.5.0-1* \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-vcstools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rosdep init && \
+  rosdep update --rosdistro $ROS_DISTRO
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-ros-base=1.5.0-1* \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-noetic-robot=1.5.0-1* \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install necessary ROS packages and other dependencies
+RUN apt-get update && apt-get install -y \
+    python3-catkin-tools \
+    ros-noetic-rviz \
+    ros-noetic-rqt-graph \
+    ros-noetic-rqt-image-view \
+    ros-noetic-rqt-tf-tree \
+    ros-noetic-rosbridge-server \
+    ros-noetic-dynamic-edt-3d \
+    ros-noetic-image-transport \
+    ros-noetic-image-transport-plugins \
+    ros-noetic-image-proc \
+    ros-noetic-rosmon \
+    ros-noetic-joy \
+    python3-pip \
+    vim \
+    tmux \
+    libtool \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install numpy scipy weightedstats flask requests scikit-learn colorama openai guidance langchain \
+asyncio nest_asyncio bs4 playwright duckduckgo_search faiss-cpu toml google-generativeai google-ai-generativelanguage \
+colorama
+
+RUN pip3 install torch torchvision torchaudio
+
+# Below added by Doncey so that all test packages will run
+RUN /bin/bash -c 'apt-get update'
+
+RUN apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:borglab/gtsam-release-4.0
+
+RUN apt install -y \
+    libasio-dev \
+    ros-noetic-turtlesim \                       
+    libgtsam-dev libgtsam-unstable-dev \
+    ros-noetic-perception-pcl \
+    ros-noetic-tf2-geometry-msgs \
+    ros-noetic-ackermann-msgs \
+    ros-noetic-joy \
+    ros-noetic-map-server \
+    ros-noetic-octomap \
+    ros-noetic-octomap-mapping \
+    ros-noetic-octomap-msgs \
+    ros-noetic-octomap-ros \
+    ros-noetic-octomap-rviz-plugins
+
+# Copy the bags into the container
+# COPY hunter_ws/ /root/hunter_ws
+
+RUN pip3 install torch torchvision torchaudio
+
+# Instal Tree of Thoughts
+#RUN cd /root/subt_ws/src/CogExplore && pip3 install tree-of-thoughts
+
+# Install any missing dependencies and clear the cache
+# RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /root/hunter_ws; apt-get update; rosdep install --from-paths src --ignore-src -r -y; apt-get clean; rm -rf /var/lib/apt/lists/*'
+
+# Build the catkin workspace
+# RUN /bin/bash -c '. /opt/ros/noetic/setup.bash; cd /root/subt_ws; catkin build -DCMAKE_BUILD_TYPE=Release'
+
+# Source the ws
+# RUN echo "source /root/hunter_ws/devel/setup.bash" >> ~/.bashrc
+
+# Set the workspace as the container's working directory
+WORKDIR /root/
