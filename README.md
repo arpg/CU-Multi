@@ -3,11 +3,9 @@
 </p>
 
 # CU-MULTI Dataset
-
-The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-robot place recognition and loop-closure. 
+The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-robot place recognition and loop-closure. **If you would like to download the dataset, you can do so [here](https://drive.google.com/drive/folders/1lrhCDy2flNDyyPkKeTmA8tNgFj4JxSwi?usp=sharing).**
 
 ## Dataset Statistics
-
 <div style="display: flex; justify-content: center;">
   <div>
     <table>
@@ -72,3 +70,7 @@ The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-
     <p><strong>Table 1.</strong> <em>Table of intra-robot loop closures in different environments</em></p>
   </div>
 </div>
+
+## Convert to ROS1 bag
+ 
+To convert the dataset to ROS1 bag files, you can use the provided Docker container. 
