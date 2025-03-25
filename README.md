@@ -6,10 +6,69 @@
 
 The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-robot place recognition and loop-closure. 
 
-## Download 
+## Dataset Statistics
 
-If you would like to download the dataset, you can do so [here](https://drive.google.com/drive/folders/1lrhCDy2flNDyyPkKeTmA8tNgFj4JxSwi?usp=sharing).
-
-## Convert to ROS1 bag
-
-To convert the dataset to ROS1 bag files, you can use the provided Docker container. 
+<div style="display: flex; justify-content: center;">
+  <div>
+    <table>
+      <tr>
+        <th>Environment</th>
+        <th>Robot ID</th>
+        <th>Total Path Length</th>
+        <th># Intra-robot loop closures</th>
+        <th># Inter-robot loop closures</th>
+      </tr>
+      <tr>
+        <td rowspan="4">Kittredge Loop</td>
+        <td>robot1</td>
+        <td>1136.41 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot2</td>
+        <td>1373.37 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot3</td>
+        <td>2792.06 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot4</td>
+        <td>4005.75 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td rowspan="4">Main Campus</td>
+        <td>robot1</td>
+        <td>1295.96 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot2</td>
+        <td>1360.43 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot3</td>
+        <td>1816.76 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+      <tr>
+        <td>robot4</td>
+        <td>2971.38 m</td>
+        <td>-</td>
+        <td>-</td>
+      </tr>
+    </table>
+    <p><strong>Table 1.</strong> <em>Table of intra-robot loop closures in different environments</em></p>
+  </div>
+</div>
