@@ -95,7 +95,7 @@ def plot_trajectories(robot_list, point_size=5):
     # print("[plot_trajectories]")
     colors = {
         1: [0, 0.6, 0],  # Green
-        2: [1, 0, 1],  # Purple
+        2: [0, 0, 1],  # Purple
         3: [1, 0.5, 0],  # Orange
         4: [0, 0, 1]   # Blue
     }
