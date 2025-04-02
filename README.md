@@ -1,4 +1,4 @@
-# CU-Multi Dataset
+# The CU-Multi Dataset
 <p align="center">
   <img src="./assets/banner_light.png" alt="banner" height="400">
 </p>
