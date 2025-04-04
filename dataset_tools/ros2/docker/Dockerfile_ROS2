@@ -1,0 +1,57 @@
+# Base Docker Image
+FROM ubuntu:22.04 
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# # Set locale (keyboard)
+# RUN locale-gen en_US en_US.UTF-8 && \
+#     update-locale \
+#     LC_ALL=en_US.UTF-8 \
+#     LANG=en_US.UTF-8
+
+# Update and install necessary packages
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    python3-pip \
+    build-essential \
+    curl \
+    wget \
+    tmux \
+    vim \
+    locales \ 
+    lsb-release \
+    gnupg \
+    git \
+    && add-apt-repository universe \
+    && apt-get update \
+    && pip3 install -U \
+    colcon-common-extensions \
+    tqdm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add ROS 2 GPG key and source
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - && \
+    echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list
+
+# Update and upgrade
+RUN apt update && apt upgrade -y
+
+# Install ROS2 Humble
+RUN apt install -y ros-humble-desktop
+
+# Development tools: Compilers and other tools to build ROS packages
+RUN apt install -y ros-dev-tools
+
+# Source ROS 2 on container startup
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+
+# Set workdir
+WORKDIR /root/

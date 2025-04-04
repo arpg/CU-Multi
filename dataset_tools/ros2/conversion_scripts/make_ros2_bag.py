@@ -18,7 +18,7 @@ import struct
 from tqdm import tqdm
 from collections import namedtuple
 from scipy.spatial.transform import Rotation as R, Slerp
-import open3d as o3d
+# import open3d as o3d
 
 def labels2RGB(label_ids, labels_dict):
     """
@@ -297,7 +297,7 @@ class ROS2BagCreator():
             msg_time_ns = int(timestamp * int(1e9))
             self.write_single_pointcloud(pc_topic_name, pc_bin_file, header_time_ns, msg_time_ns, pc_frame_id)
 
-            pc_label_bin_file = os.path.join(self.lidar_dir, "labels/gt_osm_labels", f"lidar_pointcloud_{idx}.bin")
+            pc_label_bin_file = os.path.join(self.lidar_dir, "labels", f"lidar_pointcloud_{idx}.bin")
             quaternion_tf = quat_poses_list[idx]
             tf = quaternion_pose_to_4x4(quaternion_tf[:3], quaternion_tf[3:])
             # self.write_single_semantic_pointcloud(sem_pc_topic_name, pc_bin_file, pc_label_bin_file, header_time_ns, msg_time_ns, sem_pc_frame_id, tf)
@@ -420,10 +420,10 @@ def main(args=None):
     rclpy.init(args=args)
 
     # Path to root of CU-MULTI Dataset directory
-    dataset_root_dir = '/media/donceykong/donceys_data_ssd/datasets/CU_MULTI/data'
-    environment = "main_campus"
-    robot_num = "2"
-    out_dir = "/media/donceykong/doncey_ssd_02/lidar2osm_bags"
+    dataset_root_dir = '/root/Datasets/cu_multi'
+    environment = "kittredge_loop"
+    robot_num = "1"
+    out_dir = f"{dataset_root_dir}"
 
     ROS2BagCreator(dataset_root_dir, environment, robot_num, out_dir)
 
