@@ -1,0 +1,54 @@
+# Base Image -> Jammy Jellyfish
+FROM ubuntu:22.04 
+
+# Set noninteractive mode to avoid prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV ROS_DISTRO=humble
+
+# Update and install necessary packages
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    python3-pip \
+    build-essential \
+    curl \
+    wget \
+    tmux \
+    vim \
+    locales \ 
+    lsb-release \
+    gnupg \
+    git \
+    && add-apt-repository universe \
+    && apt-get update \
+    && pip3 install -U \
+    colcon-common-extensions \
+    && rm -rf /var/lib/apt/lists/*
+
+# # Install necessary dependencies
+# RUN apt-get update && apt-get install  -y \
+#     python3-colcon-common-extensions \
+#     locales \ 
+#     curl  \
+#     gnupg \
+#     vim \
+#     tmux \
+
+# Add ROS 2 GPG key and source
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - && \
+    echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list
+
+#     $ sudo sh -c 'echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
+# $ curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+
+# Set locale
+RUN locale-gen en_US en_US.UTF-8 && \
+    update-locale \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
+
+
+# Install ROS 2 Humble
+RUN apt update && apt install -y ros-humble-desktop
+
+# Source ROS 2 on container startup
+RUN echo "cd /root/DCIST/ros2_ws && source /opt/ros/humble/setup.bash" >> ~/.bashrc
