@@ -67,11 +67,11 @@ labels = [
     Label("motorcyclist", 32, (90, 30, 150)),
     Label("road", 40, (128, 64, 128)),              # OVERLAP
     Label("parking", 44, (250, 170, 160)),          # OVERLAP
-    Label("OSM BUILDING", 45, (0, 0, 255)),         # ************ OSM
-    Label("OSM ROAD", 46, (255, 0, 0)),             # ************ OSM
+    Label("building", 45, (0, 200, 255)),      #
+    Label("sidewalk", 46, (244, 35, 232)),          #
     Label("sidewalk", 48, (244, 35, 232)),          # OVERLAP
     Label("other-ground", 49, (81, 0, 81)),         # OVERLAP
-    Label("building", 50, (0, 100, 0)),             # OVERLAP
+    Label("building", 50, (0, 0, 200)),             # OVERLAP
     Label("fence", 51, (190, 153, 153)),            # OVERLAP
     Label("other-structure", 52, (0, 150, 255)),
     Label("lane-marking", 60, (170, 255, 150)),
