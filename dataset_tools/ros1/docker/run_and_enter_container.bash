@@ -3,9 +3,13 @@
 # Give privledge for screen sharing
 xhost +local:root
 
-# Resolve absolute paths
-DATASETS_DIR="$(realpath /home/donceykong/Datasets)"
-SCRIPTS_DIR="$(realpath /home/donceykong/Desktop/ARPG/projects/CU-Multi/dataset_tools/ros1/conversion_scripts)"
+# Resolve absolute paths to:
+# 1. Dir containing CU-Multi Dataset
+DATASETS_DIR="$(realpath <ABS-PATH-TO>/Datasets)"
+# 2. Path to ROS1 conversion scripts dir
+SCRIPTS_DIR="$(realpath <ABS-PATH-TO>/CU-Multi/dataset_tools/ros1/conversion_scripts)"
+# 3. Path to ROS1 workspace for testing
+ROS2_WS_DIR="$(realpath <ABS-PATH-TO>/<your_ros2_ws>)"
 
 # Run Docker container with specified configurations
 docker run -it -d --rm --privileged \
