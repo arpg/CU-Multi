@@ -11,14 +11,14 @@ We are actively working on refining CU-MULTI. This section tracks major updates 
 
 | **Anticipated Date** | **Update**                                                                          | **Status**   | **Completion Date** | 
 |----------------------|-------------------------------------------------------------------------------------|--------------|---------------------|
-| 2025-05-19           | Initial dataset release                                                             | $${\color{green}Complete}$$        | 2025-05-19 |
-| 2025-05-30           | Created Updates bulliten                                                            | $${\color{green}Complete}$$         | 2025-05-30 |
-| 2025-06-01           | Calibration files, camera data, and IMU data added to dataset                       | $${\color{red}In \space Progress}$$ | |
+| 2025-05-19           | Initial dataset release                                                             | $${\color{green} Complete}$$        | 2025-05-19 |
+| 2025-05-30           | Created Updates bulliten                                                            | $${\color{green} Complete}$$         | 2025-05-30 |
+| 2025-06-01           | Calibration files, camera data, and IMU data added to dataset                       | $${\color{red} In \space Progress}$$ | |
 |                      | Replace `pointclouds/` with `data/` folder naming                                   |                                     | |
 |                      | Ensure only a single pose file exists for simplicity                                |                                     | |
 |                      | Compress directories at the sensor-level                                            |                                     | |
-| 2025-06-02           | Update README with images containing sensor extrinsics                              | $${\color{red}In \space Progress}$$ | |
-| 2025-06-05           | Add log file to repo for codebase and dataset release history with V1.0 release!    | $${\color{red}In \space Progress}$$ | |
+| 2025-06-02           | Update README with images containing sensor extrinsics                              | $${\color{red} In \space Progress}$$ | |
+| 2025-06-05           | Add log file to repo for codebase and dataset release history with V1.0 release!    | $${\color{red} In \space Progress}$$ | |
 
 We’ll keep this section updated as the dataset evolves. Feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
 
