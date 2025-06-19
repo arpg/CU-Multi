@@ -34,7 +34,7 @@ class DatasetToBin:
         bag_parser = BagParser(log_paths_dict=kitti_paths_dict, robot_name=robot_name)
 
         # Parse rosbag data
-        bag_path = os.path.join(self.lidar2osm_config_dict["main_bag_directory_path"], seq_name, "rosbags/liosam", f"{robot_name}_{seq_name}_liosam.bag")
+        bag_path = os.path.join(self.lidar2osm_config_dict["main_bag_directory_path"], seq_name, "rosbags/raw", f"{robot_name}_{seq_name}_raw.bag")
         print(f"        - Parsing rosbag: {bag_path}")
         bag_parser.read_bag(rosbag_path=bag_path)
 
@@ -48,6 +48,7 @@ class DatasetToBin:
         # print(f"        - Run {run_name} processed and compressed to {compressed_path}")
 
     def create_run_kitti_directory(self, seq_name, robot_number):
+        """_Create directory to store binarized bag."""
         # Make sure base directory for run exists or create it
         root_binarized_dir = self.lidar2osm_config_dict["main_output_directory_path"]
         directory_path = os.path.join(root_binarized_dir, seq_name, "binarized", f"robot{robot_number:01d}")
@@ -59,7 +60,7 @@ class DatasetToBin:
             'lidar_path': os.path.join(directory_path, "lidar"),
             'lidar_pc_bin_path': os.path.join(directory_path, "lidar", "pointclouds"),
             'gps_path': os.path.join(directory_path, "gps"),
-            # 'imu_path': os.path.join(directory_path, "imu"),
+            'imu_path': os.path.join(directory_path, "imu"),
             # 'camera_path': os.path.join(directory_path, "camera"),
             # 'camera_rgb_path': os.path.join(directory_path, "camera", "images", "rgb"),
             # 'camera_depth_path': os.path.join(directory_path, "camera", "images", "depth")
