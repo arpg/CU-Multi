@@ -23,6 +23,24 @@ class BagParser:
         self.path_topic = f"{robot_name}/lio_sam/mapping/path" 
         self.gnss_1_topic = f"{robot_name}/gnss_1/llh_position"
         self.gnss_2_topic = f"{robot_name}/gnss_2/llh_position"
+        self.imu_data_topic = f"{robot_name}/imu/data"
+
+        # IMU Data
+        self.imu_data_topic = f"/imu/data"
+        # /imu/pressure
+        # /imu/mag
+        
+        # # Depth Camera
+        # /camera/depth/metadata
+        # /camera/depth/image_rect_raw
+        self.camera_depth_cam_info_topic = f"/camera/depth/camera_info"
+        # /camera/depth/color/points 
+
+        # Color camera
+        self.camera_color_metadata_topic = f"/camera/color/metadata"
+        self.camera_color_img_raw_topic = f"/camera/color/image_raw"
+        self.camera_color_cam_info_topic = f"/camera/color/camera_info"
+        # /camera/color/image_raw/theora
 
         # self.gnss_ekf_topic = f"{robot_name}/ekf/llh_position"
         # self.imu_data_topic = f"{robot_name}/imu/data"
@@ -36,12 +54,17 @@ class BagParser:
         
         # Dictionary that maps topics to their respective handling functions. Keys can be used as wanted topics.
         self.topics_handlers_dict = {
-            self.ouster_points_topic: self.handle_ouster_pointcloud,
-            self.odom_topic: self.handle_odometry,
-            self.path_topic: self.handle_path, 
-            self.gnss_1_topic: self.handle_gnss1_gps, 
-            self.gnss_2_topic: self.handle_gnss2_gps, 
+            # self.ouster_points_topic: self.handle_ouster_pointcloud,
+            # self.odom_topic: self.handle_odometry,
+            # self.path_topic: self.handle_path, 
+            # self.gnss_1_topic: self.handle_gnss1_gps, 
+            # self.gnss_2_topic: self.handle_gnss2_gps, 
             # self.imu_data_topic: self.handle_imu_data,
+            # self.camera_color_metadata_topic: self.handle_camera_data,
+            # self.camera_color_cam_info_topic: self.handle_camera_data,
+            self.camera_depth_cam_info_topic: self.handle_camera_data,
+
+
             # self.camera_rgb_image_topic: self.handle_rgb_image,
             # self.camera_rgb_info_topic:self.handle_rgb_cam_info, 
             # self.camera_depth_image_topic: self.handle_depth_image,
@@ -50,8 +73,8 @@ class BagParser:
 
         # Initialize number of data to 0 so that it corresponds with line in timestamp text file
         self.lidar_pc_num = 0
-        # self.camera_rgb_num = 0
-        # self.camera_depth_num = 0
+        self.camera_rgb_num = 0
+        self.camera_depth_num = 0
 
         # Initialize dictionaries for timestamps and data, where dict[timestamp] = data
         self.ouster_ts_index_dict = {}    
@@ -59,7 +82,7 @@ class BagParser:
         self.gnss2_ts_data_dict = {}   
         self.odom_ts_data_dict = {}
         self.fin_path_ts_data_dict = {}
-        # self.imu_ts_data_dict = {} 
+        self.imu_ts_data_dict = {}
         # self.camera_depth_ts_index_dict = {}   
         # self.camera_rgb_ts_index_dict = {}
 
@@ -101,12 +124,12 @@ class BagParser:
     #     self.camera_depth_ts_index_dict[msg_header_time] = self.camera_depth_num
     #     self.camera_depth_num += 1
 
-    # def handle_imu_data(self, msg, msg_header_time):
-    #     # Decode IMU
-    #     imu_numpy = imu_msg_to_numpy(msg)
-    #     self.imu_ts_data_dict[msg_header_time] = imu_numpy[:6]  # Do not save orientation data
+    def handle_imu_data(self, msg, msg_header_time):
+        """IMU Data handler"""
+        imu_numpy = imu_msg_to_numpy(msg)
+        self.imu_ts_data_dict[msg_header_time] = imu_numpy[:6]  # Do not save orientation data
 
-    def handle_path(self, msg, msg_header_time=None): 
+    def handle_path(self, msg, msg_header_time=None):
         self.path_msg = msg
 
     def handle_odometry(self, msg, msg_header_time):
@@ -125,7 +148,7 @@ class BagParser:
     def handle_ouster_pointcloud(self, msg, msg_header_time):
         pointcloud = pointcloud_msg_to_numpy(msg)
 
-        # Save point cloud
+        # Save point cloud (ndarray)
         pointcloud_filename = f"{self.lidar_pc_bin_path}/unsorted_lidar_pointcloud_{self.lidar_pc_num}.bin"
         pointcloud.tofile(pointcloud_filename)
 
@@ -133,23 +156,36 @@ class BagParser:
         self.ouster_ts_index_dict[msg_header_time] = self.lidar_pc_num
         self.lidar_pc_num += 1
 
+    def handle_camera_data(self, msg, msg_header_time):
+        """RealSense camera data handler."""
+        image = decode_realsense_image(msg)
+
+        self.camera_rgb_num += 1
+
     def read_bag(self, rosbag_path):
         # Open specified rosbag file
         bag = rosbag.Bag(rosbag_path)
+        print(self.topics_handlers_dict.keys())
 
         for topic, msg, bag_time in bag.read_messages(self.topics_handlers_dict.keys()):
-            # print(f"Processing message from topic: {topic}")
-            # msg_time = f"{msg.header.stamp.secs}.{msg.header.stamp.nsecs}"
-            if hasattr(msg, 'header') and hasattr(msg.header, 'stamp'):
-                msg_header_time = f"{msg.header.stamp.to_sec():.20f}"
-            elif hasattr(msg, 'transforms'):
-                msg_header_time = None #f"{msg.transforms.header.stamp.to_sec()}"
+            print(topic)
+            print(msg)
 
-            # Dispatch message to the corresponding handler function
-            self.topics_handlers_dict[topic](msg, msg_header_time)
+        # for topic, msg, bag_time in bag.read_messages(self.topics_handlers_dict.keys()):
+        #     # print(f"Processing message from topic: {topic}")
+        #     # msg_time = f"{msg.header.stamp.secs}.{msg.header.stamp.nsecs}"
 
-        # Assign final path attributes after bag has been completely read
-        self.fin_path_ts_data_dict = path_to_numpy(self.path_msg)
+        #     if hasattr(msg, 'header') and hasattr(msg.header, 'stamp'):
+        #         msg_header_time = f"{msg.header.stamp.to_sec():.20f}"
+        #     elif hasattr(msg, 'transforms'):
+        #         msg_header_time = None #f"{msg.transforms.header.stamp.to_sec()}"
+
+        #     # Dispatch message to the corresponding handler function
+        #     self.topics_handlers_dict[topic](msg, msg_header_time)
+        #     print(topic)
+
+        # # Assign final path attributes after bag has been completely read
+        # self.fin_path_ts_data_dict = path_to_numpy(self.path_msg)
 
         # Close the bag file
         bag.close()
