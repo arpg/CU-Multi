@@ -1,4 +1,6 @@
 
+__pycache__
+
 # MACOS hidden finder support files
 .DS_Store
 main_campus
