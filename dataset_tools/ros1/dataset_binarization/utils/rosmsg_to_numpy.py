@@ -92,7 +92,7 @@ def pose_msg_to_numpy(pose_msg: Pose): # -> NDArray[np.float32]:
     return odom_quat_np
 
 
-def decode_realsense_image(msg, display_image=False):
+def decode_realsense_image(msg):
     """
     Decode a ROS sensor_msgs/Image message into a numpy array.
     """
