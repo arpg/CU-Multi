@@ -4,22 +4,47 @@ import numpy as np
 # from numpy.typing import NDArray
 from typing import Tuple
 
+from sensor_msgs.msg import PointField
 import sensor_msgs.point_cloud2 as pc2
+from pypcd4 import PointCloud as pc_pypcd
+
 from sensor_msgs.msg import CameraInfo
 from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import NavSatFix
 
+def pointcloud_msg_to_numpy(msg):
+    pc = pc_pypcd.from_msg(msg)
+    print(pc.pc_data['t'])
+
+# def pointcloud_msg_to_numpy(msg, datatype=np.float32):
+#     # List out the fields
+#     print("PointCloud2 has these fields:")
+#     for f in msg.fields:
+#         # Map the numeric datatype back to its name
+#         dt_name = {v: k for k, v in PointField.__dict__.items() 
+#                    if k.startswith("DATATYPE_")}.get(f.datatype, f.datatype)
+#         print(f"  • {f.name}: offset={f.offset}, datatype={dt_name}, count={f.count}")
+
+#     # Now read the points, matching that order
+#     field_names = [f.name for f in msg.fields]
+#     for pt in pc2.read_points(msg, field_names=field_names, skip_nans=False):
+#         # pt is a tuple whose elements line up with msg.fields
+#         for name, val in zip(field_names, pt):
+#             print(f"    {name} = {val}")
+#         break  # just print the first point
 
 def pointcloud_msg_to_numpy(msg: pc2, datatype=np.float32): # -> NDArray[np.float32]:
-    """
+    """ Returns np array consisting of lidar pointcloud.
     """
     # Decode the point cloud-- ours has five float elts:
-    field_names = ['x', 'y', 'z', 'intensity', 'reflectivity']
-    points = pc2.read_points(msg, field_names=field_names, skip_nans=True)
-    pointcloud_numpy_all = np.array(list(points), dtype=datatype)
-    
-    pointcloud_numpy = pointcloud_numpy_all[:, :4]  # Only keep the x, y, z, intensity values
+    # field_names = None # Will then save all fields
+    field_names = ['x', 'y', 'z', 'intensity', 'reflectivity']#, 't']
+    points = pc2.read_points(msg, field_names=field_names, skip_nans=False)
+    # for pt in points:
+    #     print(pt)
+
+    pointcloud_numpy = np.array(list(points), dtype=datatype)
 
     return pointcloud_numpy
 
@@ -111,3 +136,24 @@ def decode_realsense_image(msg):
     )
 
     return image
+
+def imu_msg_to_numpy(msg):
+    orientation = msg.orientation           # x, y, z, w
+    angular_vel = msg.angular_velocity      # x, y, z
+    linear_accel = msg.linear_acceleration  # x, y, z
+
+    # Flatten and concatenate all IMU components
+    imu_values = np.asarray([orientation.x, 
+                             orientation.y, 
+                             orientation.z, 
+                             orientation.w,
+                             angular_vel.x,
+                             angular_vel.y, 
+                             angular_vel.z,
+                             linear_accel.x, 
+                             linear_accel.y, 
+                             linear_accel.z], dtype=np.float64)
+
+    print(f"\nimu_values:\n{imu_values}\n")
+    return imu_values
+    # imu_data_str = " ".join(f"{v}" for v in imu_values)
