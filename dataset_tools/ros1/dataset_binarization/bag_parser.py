@@ -17,58 +17,40 @@ class BagParser:
         for key, value in log_paths_dict.items():
             setattr(self, key, value)
 
-        # Set topics
-        self.ouster_points_topic = f"{robot_name}/ouster/points"
-        self.odom_topic = f"{robot_name}/lio_sam/mapping/odometry"
-        self.path_topic = f"{robot_name}/lio_sam/mapping/path" 
-        self.gnss_1_topic = f"{robot_name}/gnss_1/llh_position"
-        self.gnss_2_topic = f"{robot_name}/gnss_2/llh_position"
-        self.imu_data_topic = f"{robot_name}/imu/data"
-
-        # IMU Data
-        self.imu_data_topic = f"/imu/data"
-        # /imu/pressure
-        # /imu/mag
-        
-        # # Depth Camera
-        # /camera/depth/metadata
-        # /camera/depth/image_rect_raw
-        self.camera_depth_cam_info_topic = f"/camera/depth/camera_info"
-        # /camera/depth/color/points 
-
-        # Color camera
-        self.camera_color_metadata_topic = f"/camera/color/metadata"
-        self.camera_color_img_raw_topic = f"/camera/color/image_raw"
-        self.camera_color_cam_info_topic = f"/camera/color/camera_info"
-        # /camera/color/image_raw/theora
-
-        # self.gnss_ekf_topic = f"{robot_name}/ekf/llh_position"
-        # self.imu_data_topic = f"{robot_name}/imu/data"
-        # self.gnss_ekf_heading_topic = f"{robot_name}/ekf/dual_antenna_heading"
-        # self.camera_depth_image_topic = f"{robot_name}/camera/depth/image_rect_raw"
-        # self.camera_depth_info_topic = f"{robot_name}/camera/depth/camera_info"
-        # self.camera_rgb_image_topic = f"{robot_name}/camera/color/image_raw"
-        # self.camera_rgb_info_topic = f"{robot_name}/camera/color/camera_info"
         # self.transforms_topic = "/tf"
         # self.static_transforms_topic = "/tf_static"
         
-        # Dictionary that maps topics to their respective handling functions. Keys can be used as wanted topics.
+        robot_name = ""
+        # Dict maps topics to their respective handling functions
         self.topics_handlers_dict = {
-            # self.ouster_points_topic: self.handle_ouster_pointcloud,
-            # self.odom_topic: self.handle_odometry,
-            # self.path_topic: self.handle_path, 
-            # self.gnss_1_topic: self.handle_gnss1_gps, 
-            # self.gnss_2_topic: self.handle_gnss2_gps, 
-            # self.imu_data_topic: self.handle_imu_data,
-            # self.camera_color_metadata_topic: self.handle_camera_data,
-            # self.camera_color_cam_info_topic: self.handle_camera_data,
-            self.camera_depth_cam_info_topic: self.handle_camera_data,
 
+            # Lidar Data
+            f"{robot_name}/ouster/points": self.handle_ouster_pointcloud,
 
-            # self.camera_rgb_image_topic: self.handle_rgb_image,
-            # self.camera_rgb_info_topic:self.handle_rgb_cam_info, 
-            # self.camera_depth_image_topic: self.handle_depth_image,
-            # self.camera_depth_info_topic: self.handle_depth_cam_info, 
+            # # GPS
+            # f"{robot_name}/gnss_1/llh_position": self.handle_gnss1_gps,
+            # f"{robot_name}/gnss_2/llh_position": self.handle_gnss2_gps, 
+
+            # IMU Data
+            f"{robot_name}/imu/data": self.handle_imu_data,
+            # f"{robot_name}/imu/pressure": self.handle_imu_pressure,
+            # f"{robot_name}/imu/mag": self.handle_imu_mag,
+
+            # # RGB CAMERA
+            # f"{robot_name}/camera/color/metadata": self.handle_camera_data,
+            # f"{robot_name}/camera/color/image_raw": self.handle_camera_data,
+            # f"{robot_name}/camera/color/camera_info": self.handle_camera_data,
+            # f"{robot_name}/camera/color/image_raw/theora":
+
+            # # DEPTH CAMERA
+            # f"{robot_name}/camera/depth/metadata": self.handle_depth_image,
+            # f"{robot_name}/camera/depth/image_rect_raw": self.handle_depth_cam_info,
+            # f"{robot_name}/camera/depth/camera_info":
+            # f"{robot_name}/camera/depth/color/points":
+
+            # # SLAM DATA
+            # f"{robot_name}/lio_sam/mapping/odometry": self.handle_odometry,
+            # f"{robot_name}/lio_sam/mapping/path": self.handle_path,  
         }
 
         # Initialize number of data to 0 so that it corresponds with line in timestamp text file
@@ -124,10 +106,13 @@ class BagParser:
     #     self.camera_depth_ts_index_dict[msg_header_time] = self.camera_depth_num
     #     self.camera_depth_num += 1
 
+    def handle_imu_pressure(self, msg, msg_header_time):
+        print("IMU pressure called")
+
     def handle_imu_data(self, msg, msg_header_time):
         """IMU Data handler"""
         imu_numpy = imu_msg_to_numpy(msg)
-        self.imu_ts_data_dict[msg_header_time] = imu_numpy[:6]  # Do not save orientation data
+        self.imu_ts_data_dict[msg_header_time] = imu_numpy
 
     def handle_path(self, msg, msg_header_time=None):
         self.path_msg = msg
@@ -146,14 +131,16 @@ class BagParser:
         self.gnss2_ts_data_dict[msg_header_time] = latlonalt
 
     def handle_ouster_pointcloud(self, msg, msg_header_time):
-        pointcloud = pointcloud_msg_to_numpy(msg)
+        
+        # Store timestamp and index
+        self.ouster_ts_index_dict[msg_header_time] = self.lidar_pc_num
 
         # Save point cloud (ndarray)
+        pointcloud = pointcloud_msg_to_numpy(msg)
         pointcloud_filename = f"{self.lidar_pc_bin_path}/unsorted_lidar_pointcloud_{self.lidar_pc_num}.bin"
         pointcloud.tofile(pointcloud_filename)
 
-        # Store timestamp and index
-        self.ouster_ts_index_dict[msg_header_time] = self.lidar_pc_num
+        # Increment index of data
         self.lidar_pc_num += 1
 
     def handle_camera_data(self, msg, msg_header_time):
@@ -168,21 +155,17 @@ class BagParser:
         print(self.topics_handlers_dict.keys())
 
         for topic, msg, bag_time in bag.read_messages(self.topics_handlers_dict.keys()):
+            # print(f"Processing message from topic: {topic}")
+            # msg_time = f"{msg.header.stamp.secs}.{msg.header.stamp.nsecs}"
+
+            if hasattr(msg, 'header') and hasattr(msg.header, 'stamp'):
+                msg_header_time = f"{msg.header.stamp.to_sec():.20f}"
+            elif hasattr(msg, 'transforms'):
+                msg_header_time = None #f"{msg.transforms.header.stamp.to_sec()}"
+
+            # Dispatch message to the corresponding handler function
+            self.topics_handlers_dict[topic](msg, msg_header_time)
             print(topic)
-            print(msg)
-
-        # for topic, msg, bag_time in bag.read_messages(self.topics_handlers_dict.keys()):
-        #     # print(f"Processing message from topic: {topic}")
-        #     # msg_time = f"{msg.header.stamp.secs}.{msg.header.stamp.nsecs}"
-
-        #     if hasattr(msg, 'header') and hasattr(msg.header, 'stamp'):
-        #         msg_header_time = f"{msg.header.stamp.to_sec():.20f}"
-        #     elif hasattr(msg, 'transforms'):
-        #         msg_header_time = None #f"{msg.transforms.header.stamp.to_sec()}"
-
-        #     # Dispatch message to the corresponding handler function
-        #     self.topics_handlers_dict[topic](msg, msg_header_time)
-        #     print(topic)
 
         # # Assign final path attributes after bag has been completely read
         # self.fin_path_ts_data_dict = path_to_numpy(self.path_msg)
@@ -200,7 +183,7 @@ class BagParser:
                 original_index = ts_index_dict[timestamp]
                 new_index = idx + 1
                 original_filename = f"{data_path}/unsorted_{filename_prefix}_{original_index}.bin"
-                new_filename = f"{data_path}/{filename_prefix}_{new_index}.bin"
+                new_filename = f"{data_path}/{new_index:10}.bin"
                 os.rename(original_filename, new_filename)
         
         # # Write and rename CAMERA RGB data
@@ -212,12 +195,11 @@ class BagParser:
         # Write and rename LIDAR data
         save_and_rename("", self.ouster_ts_index_dict, self.lidar_path, self.lidar_pc_bin_path, "lidar_pointcloud")
 
-        # # Write IMU timestamps and data
-        # imu_timestamps_np = np.array(sorted(self.imu_ts_data_dict.keys()))
-        # np.savetxt(f'{self.imu_path}/timestamps.txt', imu_timestamps_np, fmt='%s')
-
-        # imu_data_np = np.array([self.imu_ts_data_dict[timestamp] for timestamp in imu_timestamps_np])
-        # np.savetxt(f'{self.imu_path}/imu_data.txt', imu_data_np)
+        # Write IMU timestamps and data
+        imu_timestamps_np = np.array(sorted(self.imu_ts_data_dict.keys()))
+        np.savetxt(f'{self.imu_path}/timestamps.txt', imu_timestamps_np, fmt='%s')
+        imu_data_np = np.array([self.imu_ts_data_dict[timestamp] for timestamp in imu_timestamps_np])
+        np.savetxt(f'{self.imu_path}/imu_data.txt', imu_data_np)
 
         # Save RTK GPS to txt file
         gnss_1_timestamps_np = np.array(sorted(self.gnss1_ts_data_dict.keys()))
