@@ -25,7 +25,7 @@ class DatasetToBin:
         print(f"    * robot: robot{robot_number}")
 
         # Create KITTI-style directory for run
-        kitti_paths_dict = self.create_run_kitti_directory(seq_name=seq_name, robot_number=robot_number)
+        kitti_paths_dict = self.create_output_directory(seq_name=seq_name, robot_number=robot_number)
         kitti_directory_path = kitti_paths_dict['directory_path']
         print(f"        - Created KITTI-style directory: {kitti_directory_path}")
 
@@ -34,7 +34,8 @@ class DatasetToBin:
         bag_parser = BagParser(log_paths_dict=kitti_paths_dict, robot_name=robot_name)
 
         # Parse rosbag data
-        bag_path = os.path.join(self.lidar2osm_config_dict["main_bag_directory_path"], seq_name, "rosbags/raw", f"{robot_name}_{seq_name}_raw.bag")
+        # bag_path = os.path.join(self.lidar2osm_config_dict["main_bag_directory_path"], seq_name, "rosbags/raw", f"{robot_name}_{seq_name}_raw.bag")
+        bag_path = os.path.join(self.lidar2osm_config_dict["main_bag_directory_path"], f"{robot_name}_{seq_name}_raw.bag")
         print(f"        - Parsing rosbag: {bag_path}")
         bag_parser.read_bag(rosbag_path=bag_path)
 
@@ -47,7 +48,7 @@ class DatasetToBin:
         # shutil.rmtree(kitti_directory_path)
         # print(f"        - Run {run_name} processed and compressed to {compressed_path}")
 
-    def create_run_kitti_directory(self, seq_name, robot_number):
+    def create_output_directory(self, seq_name, robot_number):
         """_Create directory to store binarized bag."""
         # Make sure base directory for run exists or create it
         root_binarized_dir = self.lidar2osm_config_dict["main_output_directory_path"]
@@ -58,12 +59,12 @@ class DatasetToBin:
             'directory_path': directory_path,
             'poses_path': os.path.join(directory_path, "poses"),
             'lidar_path': os.path.join(directory_path, "lidar"),
-            'lidar_pc_bin_path': os.path.join(directory_path, "lidar", "pointclouds"),
+            'lidar_pc_bin_path': os.path.join(directory_path, "lidar", "data"),
             'gps_path': os.path.join(directory_path, "gps"),
             'imu_path': os.path.join(directory_path, "imu"),
-            # 'camera_path': os.path.join(directory_path, "camera"),
-            # 'camera_rgb_path': os.path.join(directory_path, "camera", "images", "rgb"),
-            # 'camera_depth_path': os.path.join(directory_path, "camera", "images", "depth")
+            'camera_path': os.path.join(directory_path, "camera"),
+            'camera_rgb_path': os.path.join(directory_path, "camera", "rgb", "data"),
+            'camera_depth_path': os.path.join(directory_path, "camera", "depth", "data")
         }
 
         # Create all directories based on the paths in the dictionary
