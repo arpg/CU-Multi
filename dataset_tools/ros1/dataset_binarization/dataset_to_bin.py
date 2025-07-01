@@ -63,7 +63,8 @@ class DatasetToBin:
             'gps_path': os.path.join(directory_path, "gps"),
             'imu_path': os.path.join(directory_path, "imu"),
             'camera_path': os.path.join(directory_path, "camera"),
-            'camera_rgb_path': os.path.join(directory_path, "camera", "rgb", "data"),
+            'camera_rgb_path': os.path.join(directory_path, "camera", "rgb"),
+            'camera_rgb_data_path': os.path.join(directory_path, "camera", "rgb", "data"),
             'camera_depth_path': os.path.join(directory_path, "camera", "depth", "data")
         }
 
