@@ -6,7 +6,8 @@ np.set_printoptions(suppress=True)
 from array import array
 import rosbag
 from sensor_msgs.msg import CameraInfo
-import json 
+import json
+import cv2
 
 # Internal
 from utils.rosmsg_to_numpy import *
@@ -23,11 +24,10 @@ class BagParser:
         robot_name = ""
         # Dict maps topics to their respective handling functions
         self.topics_handlers_dict = {
-
             # Lidar Data
             f"{robot_name}/ouster/points": self.handle_ouster_pointcloud,
 
-            # # GPS
+            # GPS Data
             # f"{robot_name}/gnss_1/llh_position": self.handle_gnss1_gps,
             # f"{robot_name}/gnss_2/llh_position": self.handle_gnss2_gps, 
 
@@ -36,19 +36,19 @@ class BagParser:
             # f"{robot_name}/imu/pressure": self.handle_imu_pressure,
             # f"{robot_name}/imu/mag": self.handle_imu_mag,
 
-            # # RGB CAMERA
-            # f"{robot_name}/camera/color/metadata": self.handle_camera_data,
-            # f"{robot_name}/camera/color/image_raw": self.handle_camera_data,
+            # RGB Camera Data
+            f"{robot_name}/camera/color/image_raw": self.handle_camera_data,
+            # f"{robot_name}/camera/color/metadata": self.handle_camera_data
             # f"{robot_name}/camera/color/camera_info": self.handle_camera_data,
             # f"{robot_name}/camera/color/image_raw/theora":
 
-            # # DEPTH CAMERA
+            # Depth Camera Data
+            # f"{robot_name}/camera/depth/color/points":
             # f"{robot_name}/camera/depth/metadata": self.handle_depth_image,
             # f"{robot_name}/camera/depth/image_rect_raw": self.handle_depth_cam_info,
             # f"{robot_name}/camera/depth/camera_info":
-            # f"{robot_name}/camera/depth/color/points":
 
-            # # SLAM DATA
+            # SLAM Data
             # f"{robot_name}/lio_sam/mapping/odometry": self.handle_odometry,
             # f"{robot_name}/lio_sam/mapping/path": self.handle_path,  
         }
@@ -65,8 +65,8 @@ class BagParser:
         self.odom_ts_data_dict = {}
         self.fin_path_ts_data_dict = {}
         self.imu_ts_data_dict = {}
-        # self.camera_depth_ts_index_dict = {}   
-        # self.camera_rgb_ts_index_dict = {}
+        self.camera_depth_ts_index_dict = {}   
+        self.camera_rgb_ts_index_dict = {}
 
         self.path_msg = None
         # self.rgb_info_initted = False 
@@ -137,7 +137,7 @@ class BagParser:
 
         # Save point cloud (ndarray)
         pointcloud = pointcloud_msg_to_numpy(msg)
-        pointcloud_filename = f"{self.lidar_pc_bin_path}/unsorted_lidar_pointcloud_{self.lidar_pc_num}.bin"
+        pointcloud_filename = f"{self.lidar_pc_bin_path}/unsorted_lidar_pointcloud_{self.lidar_pc_num:010d}.bin"
         pointcloud.tofile(pointcloud_filename)
 
         # Increment index of data
@@ -146,10 +146,18 @@ class BagParser:
     def handle_camera_data(self, msg, msg_header_time):
         """RealSense camera data handler."""
         image = decode_realsense_image(msg)
+        image_filename = f"{self.camera_rgb_data_path}/unsorted_camera_rgb_image_{self.camera_rgb_num:010d}.png"
+        cv2.imwrite(image_filename, image)
 
+        # Display image (for testing)
+        # cv2.imshow("Camera RGB", image)
+        # cv2.waitKey(1)  # Required to update the OpenCV window
+
+        # Increment index of data
         self.camera_rgb_num += 1
 
     def read_bag(self, rosbag_path):
+        """Reads rosbag, given path to rosbag."""
         # Open specified rosbag file
         bag = rosbag.Bag(rosbag_path)
         print(self.topics_handlers_dict.keys())
@@ -175,25 +183,25 @@ class BagParser:
 
     def write_data_to_files(self):
         # Helper function to handle timestamps, renaming, and saving data
-        def save_and_rename(timestamp_file_prefix, ts_index_dict, timestamp_path, data_path, filename_prefix):
+        def save_and_rename(ts_index_dict, timestamp_path, data_path, orig_filename_prefix):
             timestamps_np = np.array(sorted(ts_index_dict.keys()))
-            np.savetxt(f'{timestamp_path}/{timestamp_file_prefix}timestamps.txt', timestamps_np, fmt='%s')
+            np.savetxt(f'{timestamp_path}/timestamps.txt', timestamps_np, fmt='%s')
 
             for idx, timestamp in enumerate(timestamps_np):
                 original_index = ts_index_dict[timestamp]
                 new_index = idx + 1
-                original_filename = f"{data_path}/unsorted_{filename_prefix}_{original_index}.bin"
-                new_filename = f"{data_path}/{new_index:10}.bin"
+                original_filename = f"{data_path}/{orig_filename_prefix}_{original_index:010d}.bin"
+                new_filename = f"{data_path}/{new_index:010d}.bin"
                 os.rename(original_filename, new_filename)
         
-        # # Write and rename CAMERA RGB data
-        # save_and_rename("rgb_", self.camera_rgb_ts_index_dict, self.camera_path, self.camera_rgb_path, "camera_rgb_image")
+        # Write and rename Camera RGB data
+        save_and_rename(self.camera_rgb_ts_index_dict, self.camera_rgb_data_path, self.camera_rgb_data_path, "unsorted_camera_rgb_image")
         
-        # # Write and rename CAMERA DEPTH data
+        # Write and rename camera depth data
         # save_and_rename("depth_", self.camera_depth_ts_index_dict, self.camera_path, self.camera_depth_path, "camera_depth_image")
         
         # Write and rename LIDAR data
-        save_and_rename("", self.ouster_ts_index_dict, self.lidar_path, self.lidar_pc_bin_path, "lidar_pointcloud")
+        save_and_rename(self.ouster_ts_index_dict, self.lidar_path, self.lidar_pc_bin_path, "unsorted_lidar_pointcloud")
 
         # Write IMU timestamps and data
         imu_timestamps_np = np.array(sorted(self.imu_ts_data_dict.keys()))
@@ -224,7 +232,7 @@ class BagParser:
         fin_path_quat_np = np.array([self.fin_path_ts_data_dict[timestamp] for timestamp in fin_path_timestamps_np])
         np.savetxt(f'{self.poses_path}/groundtruth_path.txt', fin_path_quat_np) 
 
-        # # Save Camera calib info 
+        # # Save camera calib info 
         # with open(self.camera_path + '/rgb_cam_info.json','w') as f: 
         #     json.dump(self.rgb_info,f,indent=4) 
 
