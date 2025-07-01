@@ -6,7 +6,7 @@
 The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-robot place recognition and loop-closure detection.
 
 ## Download Dataset
-**If you would like to download the dataset, you can do so [here]([https://drive.google.com/drive/folders/1lrhCDy2flNDyyPkKeTmA8tNgFj4JxSwi?usp=sharing](https://app.globus.org/file-manager?origin_id=ae3a873e-d159-4e7b-8a57-9be2699eea52&origin_path=%2F)).** A Globus account is required, which you can create using either your institutional or personal email address.
+**If you would like to download the dataset, you can do so [here](https://drive.google.com/drive/folders/1lrhCDy2flNDyyPkKeTmA8tNgFj4JxSwi?usp=sharing](https://app.globus.org/file-manager?origin_id=ae3a873e-d159-4e7b-8a57-9be2699eea52&origin_path=%2F).** A Globus account is required, which you can create using either your institutional or personal email address.
 
 ## Dataset Updates
 
