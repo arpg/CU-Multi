@@ -6,6 +6,7 @@ import numpy as np
 import open3d as o3d
 import re
 
+
 def load_lidar(lidar_bin_path):
     data = np.fromfile(lidar_bin_path, dtype=np.float32)
     return data.reshape((-1, 4))
@@ -68,6 +69,7 @@ def q_normalize(q):
     n = np.linalg.norm(q)
     return q / n if n > 0 else np.array([0.0, 0.0, 0.0, 1.0])
 
+
 def q_multiply(q1, q2):
     # Both in [x, y, z, w]
     x1, y1, z1, w1 = q1
@@ -77,6 +79,7 @@ def q_multiply(q1, q2):
     z = w1*z2 + x1*y2 - y1*x2 + z1*w2
     w = w1*w2 - x1*x2 - y1*y2 - z1*z2
     return np.array([x, y, z, w])
+
 
 def q_rotate_vec(q, v):
     # Rotate vector v by quaternion q([x,y,z,w])
@@ -119,6 +122,9 @@ def get_map(csv_file_path, color, lidar_bin_dir, frame_inc=10):
         points_np = points_np[mask]
 
         pc_xyz = points_np[:, :3].astype(np.float64, copy=False)
+        pc_intensities = points_np[:, 3].astype(np.float64, copy=False)
+        
+        print(f"pc_intensities: \n {pc_intensities}")
 
         # Build 4x4 pose matrix from pos & quat (assumes quat = [qx, qy, qz, qw])
         IMU_TO_LIDAR_T = np.array([-0.06286, 0.01557, 0.053345])
