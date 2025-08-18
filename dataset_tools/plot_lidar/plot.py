@@ -103,7 +103,8 @@ def get_map(csv_file_path, color, lidar_bin_dir, frame_inc=10):
     all_lidar_numbers = get_frame_numbers(lidar_bin_dir)
 
     map_points = []
-    
+    map_colors = []
+
     frame_min = 5000
     frame_max= 8000
 
@@ -122,9 +123,8 @@ def get_map(csv_file_path, color, lidar_bin_dir, frame_inc=10):
         points_np = points_np[mask]
 
         pc_xyz = points_np[:, :3].astype(np.float64, copy=False)
-        pc_intensities = points_np[:, 3].astype(np.float64, copy=False)
-        
-        print(f"pc_intensities: \n {pc_intensities[0]}")
+        pc_intensities = points_np[:, 3].astype(np.float64, copy=False) / 255.0
+        pc_colors = 
 
         # Build 4x4 pose matrix from pos & quat (assumes quat = [qx, qy, qz, qw])
         IMU_TO_LIDAR_T = np.array([-0.06286, 0.01557, 0.053345])
