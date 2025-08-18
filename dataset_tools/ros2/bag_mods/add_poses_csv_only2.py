@@ -118,11 +118,12 @@ def load_csv_poses(path):
     positions = np.stack([r.position for r in records])
     quaternions = np.stack([q_normalize(r.orientation) for r in records])
 
-    # origin = positions[0].copy()
-    # quaternions = 
-    # positions = positions - origin
+    origin_pos_imu = positions[0].copy()
+    origin_quat_imu = quaternions[0].copy()
+    positions = positions - origin_pos_imu
+    quaternions = quaternions - origin_quat_imu
 
-    return times, positions, quaternions
+    return times, positions, quaternions, origin_pos_imu, origin_quat_imu
 
 
 # for interpolation helper
@@ -158,7 +159,7 @@ if __name__ == "__main__":
         lidar_frame   = f"robot{robot}_os_sensor"
 
         # --- load CSV poses once (IMU frame), then apply extrinsic to LiDAR frame ---
-        csv_times, csv_pos_imu, csv_quat_imu, = load_csv_poses(csv_file)
+        csv_times, csv_pos_imu, csv_quat_imu, origin_pos_imu, origin_quat_imu  = load_csv_poses(csv_file)
         t0 = csv_times[0]
 
         # Init Writer
@@ -194,8 +195,11 @@ if __name__ == "__main__":
         # Rolling path message
         path_msg = Path()
         path_msg.header.frame_id = world_frame
-        p_lidar_origin = None
-        q_lidar_origin = None
+
+        p_map = origin_pos_imu + q_rotate_vec(origin_quat_imu, IMU_TO_LIDAR_T)
+        q_map = q_multiply(origin_quat_imu, IMU_TO_LIDAR_Q)
+        p_world_map = p_map.tolist()
+        q_world_map = q_map.tolist()
         for t_s, p_imu, q_imu in zip(csv_times, csv_pos_imu, csv_quat_imu):
             # Compose LiDAR pose in map:  
             # T_map_lidar = T_map_imu * T_imu_lidar
@@ -203,16 +207,14 @@ if __name__ == "__main__":
             q_lidar = q_multiply(q_imu, IMU_TO_LIDAR_Q)
             
             # Convert to lists
-            imu_xyz = p_imu.tolist()
-            imu_quat_xyzw = q_imu.tolist()
-            imu2lidar_xyz = IMU_TO_LIDAR_T.tolist()
-            imu2lidar_quat_xyzw = IMU_TO_LIDAR_Q.tolist()
+            # imu_xyz = p_imu.tolist()
+            # imu_quat_xyzw = q_imu.tolist()
+
+            # imu2lidar_xyz = IMU_TO_LIDAR_T.tolist()
+            # imu2lidar_quat_xyzw = IMU_TO_LIDAR_Q.tolist()
+
             lidar_xyz = p_lidar.tolist()
             lidar_quat_xyzw = q_lidar.tolist()
-
-            if p_lidar_origin is None and q_lidar_origin is None:
-                p_lidar_origin = lidar_xyz
-                q_lidar_origin = lidar_quat_xyzw
 
             # Timestamp in ns (epoch if CSV looks like epoch; else start at 0)
             stamp_ns = secs_to_ns_epoch_or_rel(t_s, t0)
@@ -221,8 +223,8 @@ if __name__ == "__main__":
             # --- Odometry (map -> lidar_frame) ---
             # leave covariance, twist as zeros
             odom = Odometry()
-            odom.header.frame_id = world_frame
-            odom.child_frame_id = imu_frame
+            odom.header.frame_id = map_frame
+            odom.child_frame_id = lidar_frame
             odom.header.stamp = stamp_msg
             
             odom.pose.pose.position.x = lidar_xyz[0]
@@ -237,7 +239,7 @@ if __name__ == "__main__":
 
             # --- Path (in map frame, LiDAR poses) ---
             ps = PoseStamped()
-            ps.header.frame_id = world_frame
+            ps.header.frame_id = map_frame
             ps.header.stamp = stamp_msg
             ps.pose.position.x = lidar_xyz[0]
             ps.pose.position.y = lidar_xyz[1]
@@ -258,41 +260,54 @@ if __name__ == "__main__":
             tf_world_map.header.frame_id = world_frame
             tf_world_map.child_frame_id = map_frame
             tf_world_map.header.stamp = stamp_msg
-            tf_world_map.transform.translation.x = p_lidar_origin[0]
-            tf_world_map.transform.translation.y = p_lidar_origin[1]
-            tf_world_map.transform.translation.z = p_lidar_origin[2]
-            tf_world_map.transform.rotation.x = q_lidar_origin[0]
-            tf_world_map.transform.rotation.y = q_lidar_origin[1]
-            tf_world_map.transform.rotation.z = q_lidar_origin[2]
-            tf_world_map.transform.rotation.w = q_lidar_origin[3]
+            tf_world_map.transform.translation.x = p_world_map[0]
+            tf_world_map.transform.translation.y = p_world_map[1]
+            tf_world_map.transform.translation.z = p_world_map[2]
+            tf_world_map.transform.rotation.x = q_world_map[0]
+            tf_world_map.transform.rotation.y = q_world_map[1]
+            tf_world_map.transform.rotation.z = q_world_map[2]
+            tf_world_map.transform.rotation.w = q_world_map[3]
 
-            # world -> imu (dynamic)
-            tf_world_imu = TransformStamped()
-            tf_world_imu.header.frame_id = world_frame
-            tf_world_imu.child_frame_id = imu_frame
-            tf_world_imu.header.stamp = stamp_msg
-            tf_world_imu.transform.translation.x = imu_xyz[0]
-            tf_world_imu.transform.translation.y = imu_xyz[1]
-            tf_world_imu.transform.translation.z = imu_xyz[2]
-            tf_world_imu.transform.rotation.x = imu_quat_xyzw[0]
-            tf_world_imu.transform.rotation.y = imu_quat_xyzw[1]
-            tf_world_imu.transform.rotation.z = imu_quat_xyzw[2]
-            tf_world_imu.transform.rotation.w = imu_quat_xyzw[3]
+            # world -> lidar (dynamic)
+            tf_map_lidar = TransformStamped()
+            tf_map_lidar.header.frame_id = map_frame
+            tf_map_lidar.child_frame_id = lidar_frame
+            tf_map_lidar.header.stamp = stamp_msg
+            tf_map_lidar.transform.translation.x = lidar_xyz[0]
+            tf_map_lidar.transform.translation.y = lidar_xyz[1]
+            tf_map_lidar.transform.translation.z = lidar_xyz[2]
+            tf_map_lidar.transform.rotation.x = lidar_quat_xyzw[0]
+            tf_map_lidar.transform.rotation.y = lidar_quat_xyzw[1]
+            tf_map_lidar.transform.rotation.z = lidar_quat_xyzw[2]
+            tf_map_lidar.transform.rotation.w = lidar_quat_xyzw[3]
 
-            # imu -> lidar (static, repeated on /tf for simplicity)
-            tf_imu_lidar = TransformStamped()
-            tf_imu_lidar.header.frame_id = imu_frame
-            tf_imu_lidar.child_frame_id = lidar_frame
-            tf_imu_lidar.header.stamp = stamp_msg
-            tf_imu_lidar.transform.translation.x = imu2lidar_xyz[0]
-            tf_imu_lidar.transform.translation.y = imu2lidar_xyz[1]
-            tf_imu_lidar.transform.translation.z = imu2lidar_xyz[2]
-            tf_imu_lidar.transform.rotation.x = imu2lidar_quat_xyzw[0]
-            tf_imu_lidar.transform.rotation.y = imu2lidar_quat_xyzw[1]
-            tf_imu_lidar.transform.rotation.z = imu2lidar_quat_xyzw[2]
-            tf_imu_lidar.transform.rotation.w = imu2lidar_quat_xyzw[3]
+            # # world -> imu (dynamic)
+            # tf_world_imu = TransformStamped()
+            # tf_world_imu.header.frame_id = map_frame
+            # tf_world_imu.child_frame_id = imu_frame
+            # tf_world_imu.header.stamp = stamp_msg
+            # tf_world_imu.transform.translation.x = imu_xyz[0]
+            # tf_world_imu.transform.translation.y = imu_xyz[1]
+            # tf_world_imu.transform.translation.z = imu_xyz[2]
+            # tf_world_imu.transform.rotation.x = imu_quat_xyzw[0]
+            # tf_world_imu.transform.rotation.y = imu_quat_xyzw[1]
+            # tf_world_imu.transform.rotation.z = imu_quat_xyzw[2]
+            # tf_world_imu.transform.rotation.w = imu_quat_xyzw[3]
 
-            tf_msg = TFMessage(transforms=[tf_world_map, tf_world_imu, tf_imu_lidar])
+            # # imu -> lidar (static, repeated on /tf for simplicity)
+            # tf_imu_lidar = TransformStamped()
+            # tf_imu_lidar.header.frame_id = imu_frame
+            # tf_imu_lidar.child_frame_id = lidar_frame
+            # tf_imu_lidar.header.stamp = stamp_msg
+            # tf_imu_lidar.transform.translation.x = imu2lidar_xyz[0]
+            # tf_imu_lidar.transform.translation.y = imu2lidar_xyz[1]
+            # tf_imu_lidar.transform.translation.z = imu2lidar_xyz[2]
+            # tf_imu_lidar.transform.rotation.x = imu2lidar_quat_xyzw[0]
+            # tf_imu_lidar.transform.rotation.y = imu2lidar_quat_xyzw[1]
+            # tf_imu_lidar.transform.rotation.z = imu2lidar_quat_xyzw[2]
+            # tf_imu_lidar.transform.rotation.w = imu2lidar_quat_xyzw[3]
+
+            tf_msg = TFMessage(transforms=[tf_world_map, tf_map_lidar])
             writer.write(tf_topic, serialize_message(tf_msg), stamp_ns)
 
         # Done
