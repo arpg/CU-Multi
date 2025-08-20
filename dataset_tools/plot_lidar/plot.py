@@ -95,59 +95,105 @@ def wxyz_to_xyzw(q_wxyz):
     return np.array([q_wxyz[1], q_wxyz[2], q_wxyz[3], q_wxyz[0]], dtype=float)
 
 
-def get_map(csv_file_path, color, lidar_bin_dir, frame_inc=10):
-    # get all lines in csv for poses
-    positions, quats = load_poses(csv_file_path)  # expect lists/arrays of equal length
+def deskew_scan():
 
-    # get all binarized lidar in lidar dir (count all files)
-    all_lidar_numbers = get_frame_numbers(lidar_bin_dir)
+    
+def get_map(csv_file_path, color, lidar_bin_dir, frame_inc=1000):
+    # Load poses (assumed same length/order as LiDAR frames or we'll zip to shortest)
+    positions, quats = load_poses(csv_file_path)
+    positions -= positions[0]
+
+    # Make sure frames are in ascending order
+    all_lidar_numbers = sorted(get_frame_numbers(lidar_bin_dir))
 
     map_points = []
     map_colors = []
 
     frame_min = 5000
-    frame_max= 8000
+    frame_max = 8000
 
-    # iterate in lockstep, optionally skipping frames by frame_inc
+    # Normalize the base color to [0,1] for Open3D
+    base_color = np.asarray(color, dtype=np.float64)
+
     for i, (scan_num, pos, quat) in enumerate(zip(all_lidar_numbers, positions, quats)):
+        # optional stride
         if frame_inc is not None and frame_inc > 1 and (i % frame_inc) != 0:
             continue
-        # if i > frame_max: #frame_inc is not None and frame_inc > 1 and (i % frame_inc) != 0:
-        #     break
+        # # optional frame window
+        # if scan_num < frame_min or scan_num > frame_max:
+        #     continue
 
-        # Load LiDAR points: expects Nx4 or Nx3 array; we use only xyz
-        print(scan_num)
-        points_np = load_lidar(os.path.join(lidar_bin_dir, f"lidar_pointcloud_{scan_num}.bin"))
-        distances = np.linalg.norm(points_np, axis=1)
-        mask = (distances < 40)
-        points_np = points_np[mask]
+        bin_path = os.path.join(lidar_bin_dir, f"lidar_pointcloud_{scan_num}.bin")
+        try:
+            points_np = load_lidar(bin_path)  # expects Nx3 or Nx4
+        except FileNotFoundError:
+            print(f"[warn] missing LiDAR file: {bin_path}; skipping")
+            continue
 
+        if points_np.size == 0:
+            continue
+
+        # Split xyz and intensities (if present)
         pc_xyz = points_np[:, :3].astype(np.float64, copy=False)
-        pc_intensities = points_np[:, 3].astype(np.float64, copy=False) / 255.0
-        pc_colors = 
+        if points_np.shape[1] >= 4:
+            pc_intensities = points_np[:, 3].astype(np.float64, copy=False) / 255.0
+        else:
+            pc_intensities = np.ones(pc_xyz.shape[0], dtype=np.float64)
 
-        # Build 4x4 pose matrix from pos & quat (assumes quat = [qx, qy, qz, qw])
-        IMU_TO_LIDAR_T = np.array([-0.06286, 0.01557, 0.053345])
-        IMU_TO_LIDAR_Q = q_normalize([0.0, 0.0, 1.0, 0.0])
-        quat_fixed = wxyz_to_xyzw(quat)
+        # Range filter (use xyz only)
+        distances = np.linalg.norm(pc_xyz, axis=1)
+        mask = distances < 100.0
+
+        if not np.any(mask):
+            continue
+        pc_xyz = pc_xyz[mask]
+        pc_intensities = pc_intensities[mask]
+
+        # heights = pc_xyz[:, 2]
+        # mask_height = 0.5 < heights # and heights < 5
+
+        # pc_xyz = pc_xyz[mask_height]
+        # pc_intensities = pc_intensities[mask_height]
+
+        pc_xyz[:, 2] = 0
+
+        # Per-point colors (Nx3), clipped to [0,1]
+        pc_colors = np.clip(pc_intensities[:, None] * base_color[None, :], 0.1, 1.0)
+
+        # Pose: IMU->LiDAR fixed transform + world pose
+        IMU_TO_LIDAR_T = np.array([-0.06286, 0.01557, 0.053345], dtype=np.float64)
+        IMU_TO_LIDAR_Q = q_normalize([0.0, 0.0, 1.0, 0.0])  # (x,y,z,w) as your utils expect
+        quat_fixed = wxyz_to_xyzw(quat)                     # convert input to (x,y,z,w) if needed
         p_map = pos + q_rotate_vec(quat_fixed, IMU_TO_LIDAR_T)
         q_map = q_multiply(quat_fixed, IMU_TO_LIDAR_Q)
 
-        transformation_matrix = pose_to_matrix(p_map, q_map)
+        T = pose_to_matrix(p_map, q_map)  # 4x4
 
-        # Apply transform (homogeneous or direct form both fine)
-        xyz_homogeneous = np.hstack([pc_xyz, np.ones((pc_xyz.shape[0], 1), dtype=np.float64)])
-        
-        transformed_xyz = (xyz_homogeneous @ transformation_matrix.T)[:, :3]
+        # Transform points (homogeneous)
+        xyz_h = np.hstack([pc_xyz, np.ones((pc_xyz.shape[0], 1), dtype=np.float64)])
+        transformed_xyz = (xyz_h @ T.T)[:, :3]
 
         map_points.append(transformed_xyz)
+        map_colors.append(pc_colors)
 
-    map_points = np.vstack(map_points)  # (M, 3)
+        # o3d_scan_pcd = o3d.geometry.PointCloud()
+        # o3d_scan_pcd.points = o3d.utility.Vector3dVector(transformed_xyz)
+        # o3d_scan_pcd.colors = o3d.utility.Vector3dVector(pc_colors)
+        # pcd_downsampled = o3d_scan_pcd.voxel_down_sample(voxel_size=1.0)
+
+        # map_points.append(pcd_downsampled.points)
+        # map_colors.append(pcd_downsampled.colors)
+
+    if not map_points:
+        raise ValueError("No points collected. Check paths, frame range, and filters.")
+
+    map_points = np.vstack(map_points)
+    all_colors = np.vstack(map_colors)
 
     o3d_pcd = o3d.geometry.PointCloud()
     o3d_pcd.points = o3d.utility.Vector3dVector(map_points)
-    o3d_pcd.paint_uniform_color(color)
-    pcd_downsampled = o3d_pcd.voxel_down_sample(voxel_size=1)
+    o3d_pcd.colors = o3d.utility.Vector3dVector(all_colors)
+    pcd_downsampled = o3d_pcd.voxel_down_sample(voxel_size=1.0)
 
     return pcd_downsampled
 
@@ -211,7 +257,7 @@ def get_lineset(csv_path, color):
 def main():
     # environments = ["kittredge_loop", "main_campus"]
     environments = ["main_campus"]
-    robots = [1, 2, 3]
+    robots = [1, 2, 3, 4]
     colors = [
         np.array([87, 227, 137])/255.0,
         np.array([192, 97, 203])/255.0,
