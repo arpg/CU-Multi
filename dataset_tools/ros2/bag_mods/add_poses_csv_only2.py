@@ -121,7 +121,7 @@ def load_csv_poses(path):
     origin_pos_imu = positions[0].copy()
     origin_quat_imu = quaternions[0].copy()
     positions = positions - origin_pos_imu
-    quaternions = quaternions - origin_quat_imu
+    # quaternions = quaternions - origin_quat_imu
 
     return times, positions, quaternions, origin_pos_imu, origin_quat_imu
 
@@ -139,14 +139,14 @@ if __name__ == "__main__":
     robots = [1]
 
     # IMU -> LiDAR extrinsic (IMU frame to LiDAR frame)
-    IMU_TO_LIDAR_T = np.array([-0.06286, 0.01557, 0.053345])
+    IMU_TO_LIDAR_T = np.array([-0.058038, 0.015573, 0.049603])
     IMU_TO_LIDAR_Q = q_normalize([0.0, 0.0, 1.0, 0.0])
 
     for robot in robots:
         bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
         in_uri = os.path.join(bag_dir, f"robot{robot}_{env}_poses")
-        csv_file = os.path.join(bag_dir, f"{env}_robot{robot}_ref.csv")
-        out_uri = in_uri + "_CSV_ONLY"
+        csv_file = os.path.join(bag_dir, f"{env}_robot{robot}_ref_NEW_aligned.csv")
+        out_uri = in_uri + "_CSV_NEW"
 
         # Topics
         odom_topic    = f"robot{robot}/lio_sam/mapping/odometry"
@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
         # Rolling path message
         path_msg = Path()
-        path_msg.header.frame_id = world_frame
+        path_msg.header.frame_id = map_frame
 
         p_map = origin_pos_imu + q_rotate_vec(origin_quat_imu, IMU_TO_LIDAR_T)
         q_map = q_multiply(origin_quat_imu, IMU_TO_LIDAR_Q)
