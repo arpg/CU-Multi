@@ -1,0 +1,378 @@
+<?xml version="1.0"?>
+
+<robot name="hunter_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- <xacro:property name="robot_namespace" default="robot1"/> -->
+  <!-- <xacro:arg name="name" default=""/> -->
+  <!-- <xacro:property name="robot_namespace" value="$(arg name)"/> -->
+
+  <!--  Degree-to-radian conversions -->
+  <xacro:property name="degrees_45" value="0.785398163"/>
+  <xacro:property name="degrees_90" value="1.57079633"/>
+  <!-- <xacro:property name="pi" value="3.14159265359"/> -->
+
+  <!--  chassis properties -->
+  <xacro:property name="chassis_length" value="0.50"/>  <!-- chassis_length: along x -->
+  <xacro:property name="chassis_width" value="0.30"/>   <!-- chassis_width: along y -->
+  <xacro:property name="chassis_height" value="0.20"/>  <!-- chassis_height: along z -->  
+  <xacro:property name="chassis_mass" value="2.788"/>
+
+  <!-- wheel properties -->
+  <xacro:property name="hub_dia" value="0.09652"/>        <!-- hub_dia: Diam of hub -->
+  <xacro:property name="tire_dia" value="0.275"/>         <!-- tire_dia: Diam of tire -->
+  <xacro:property name="tire_width" value="0.08912"/>     <!-- -->
+  <xacro:property name="hex_hub_depth" value="0.01445"/>  <!-- hex_hub_depth: inset dist of hex hub from edge of tire. hex_hub_depth = tire_width / 2 - axle_length -->
+  <xacro:property name="wheel_mass" value="0.29"/>        <!-- -->
+
+  <!-- axel properties -->
+  <xacro:property name="wheelbase" value="0.575"/>        <!-- Axel dist -->
+  <xacro:property name="hex_hub_dist" value="0.55"/>      <!-- hex_hub_dist: distance b/w left and right hex hubs when the shock absorbers are fully extended.-->
+  <xacro:property name="axle_length" value="0.03"/>       <!-- axle_length is the distance from a U joint to the corresponding hex hub. -->
+  <xacro:property name="wheel_travel" value="0.01"/>      <!-- wheel_travel is the vertical wheel travel. -->
+  <xacro:property name="shock_z_offset" value="0.28"/>
+
+  <!-- Ouster properties -->
+  <xacro:property name="ouster_dia" value="0.087"/>       <!-- Ouster diameter -->
+  <xacro:property name="ouster_height" value="0.0742"/>   <!-- Ouster height with radial cap -->
+  <xacro:property name="ouster_mass" value="0.03"/>       <!-- Ouster mass -->
+
+  <!-- shock_eff_limit: 2 * ((shock_stroke / 2) * shock_spring_constant) N.
+       shock_stroke is 0.028575 meters. shock_spring_constant, an approximation
+       of a Traxxas Ultra Shock shock absorber spring's constant, is
+       437.817 N/m. -->
+  <xacro:property name="shock_eff_limit" value="200"/>
+  <xacro:property name="shock_vel_limit" value="1000"/>
+
+  <!-- The specifications for a Titan(R) 550 motor could not be found, so the
+       stall torque of a Mabuchi Motor(R) RS-550VC-7525 motor was used instead. -->
+  <xacro:property name="axle_eff_limit" value="5.12766"/>
+  <xacro:property name="axle_vel_limit" value="244.8696"/>
+
+  <!-- These constants are used to simulate a Traxxas 2056 servo operated at
+       6 V. servo_stall_torque is measured in N m. servo_no_load_speed is
+       measured in rad/s. -->
+  <xacro:property name="servo_stall_torque" value="10"/>
+  <xacro:property name="servo_no_load_speed" value="4.553"/>
+
+  <!-- Plate dimentions -->
+  <xacro:property name="mp_width" value="0.1524"/>        <!-- -->
+  <xacro:property name="mp_length" value="0.1524"/>        <!-- -->
+  <xacro:property name="mp_height" value="0.015"/>        <!-- -->
+
+  <xacro:property name="ouster_riser_width" value="0.08255"/>        <!-- -->
+  <xacro:property name="ouster_riser_length" value="0.08255"/>        <!-- -->
+  <xacro:property name="ouster_riser_height" value="0.02"/>        <!-- -->
+
+  <material name="chassis_mat">
+    <color rgba="0.5 0.5 0.5 1"/>
+  </material>
+  <material name="tire_mat">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <!-- ***************************************************************************************** -->
+  <!--                                  hunter elements                                          -->
+  <!-- ***************************************************************************************** -->
+  <!-- Null inertial element. This is needed to make the model work with Gazebo. -->
+  <xacro:macro name="null_inertial">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Inertia of a solid cuboid. Width is measured along the x axis, depth along the y axis, and height along the z axis. -->
+  <xacro:macro name="solid_cuboid_inertial" params="width depth height mass *origin">
+    <inertial>
+      <xacro:insert_block name="origin"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass * (depth * depth + height * height) / 12}"
+               ixy="0" ixz="0"
+               iyy="${mass * (width * width + height * height) / 12}"
+               iyz="0"
+               izz="${mass * (width * width + depth * depth) / 12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Inertia of a thick-walled cylindrical tube with open ends. Height is
+       measured along the z axis, which is the tube's axis. inner_rad and
+       outer_rad are the tube's inner and outer radii, respectively. -->
+  <xacro:macro name="thick_walled_tube_inertial" params="inner_rad outer_rad height mass">
+    <inertial>
+      <mass value="${mass}"/>
+      <inertia ixx="${(1 / 12) * mass * (3 * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) + height * height)}"
+               ixy="0" ixz="0"
+               iyy="${(1 / 12) * mass * (3 * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) + height * height)}"
+               iyz="0"
+               izz="${mass * (inner_rad * inner_rad +
+                    outer_rad * outer_rad) / 2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Shock absorber -->
+  <xacro:macro name="shock" params="lr_prefix fr_prefix lr_reflect fr_reflect child">
+    <joint name="${lr_prefix}_${fr_prefix}_shock" type="fixed">
+      <parent link="chassis"/>
+      <child link="${child}"/>
+
+      <origin xyz="${fr_reflect * wheelbase / 2} 
+                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
+                   ${(wheel_travel / 2) - shock_z_offset}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- The "wheel" macro defines an axle carrier, axle, and wheel. -->
+  <xacro:macro name="wheel" params="lr_prefix fr_prefix lr_reflect">
+    <link name="${lr_prefix}_${fr_prefix}_axle_carrier">
+      <xacro:null_inertial/>
+    </link>
+
+    <!-- The left and right axles have the same axis so that identical rotation values cause the wheels to rotate in the same direction. -->
+    <joint name="${lr_prefix}_${fr_prefix}_axle" type="fixed">
+      <parent link="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+      <child link="${lr_prefix}_${fr_prefix}_wheel"/>
+      <origin rpy="${degrees_90} 0 0"/>
+    </joint>
+
+    <link name="${lr_prefix}_${fr_prefix}_wheel">
+      <visual>
+        <origin xyz="0 ${lr_reflect*(axle_length-(tire_width/2-hex_hub_depth))} 0" rpy="${degrees_90 + lr_reflect*degrees_90} 0 0"/>
+        <geometry>
+		      <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae"  scale="-0.001 0.001 0.001"/>
+        </geometry>
+        <material name="tire_mat"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 ${lr_reflect*(axle_length-(tire_width/2-hex_hub_depth))} 0"/>
+        <geometry>
+          <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+          <cylinder radius="${tire_dia/2}" length="${tire_width}"/>
+        </geometry>
+      </collision>
+
+      <!-- Inertial properties -->
+      <xacro:thick_walled_tube_inertial inner_rad="${hub_dia/2}" outer_rad="${tire_dia/2}" height="${tire_width}" mass="${wheel_mass}"/>
+    </link>
+  </xacro:macro>
+
+  <!-- Front wheel -->
+  <xacro:macro name="front_wheel" params="lr_prefix fr_prefix lr_reflect fr_reflect">
+    <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}" 
+                 fr_reflect="${fr_reflect}" child="${lr_prefix}_steering_link"/>
+
+    <link name="${lr_prefix}_steering_link">
+      <xacro:null_inertial/>
+    </link>
+
+    <joint name="${lr_prefix}_steering_joint" type="fixed">
+      <parent link="${lr_prefix}_steering_link"/>
+      <child link="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}"/>
+  </xacro:macro>
+
+  <!-- Rear wheel -->
+  <xacro:macro name="rear_wheel" params="lr_prefix fr_prefix lr_reflect fr_reflect">
+    <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}"
+                 lr_reflect="${lr_reflect}" fr_reflect="${fr_reflect}"
+                 child="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+    <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}"/>
+  </xacro:macro>
+
+  <!-- ***************************************************************************************** -->
+  <!--                                         LINKS                                             -->
+  <!-- ***************************************************************************************** -->
+  <!-- base_link must have geometry so that its axes can be displayed in rviz. -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="chassis_mat"/>
+    </visual>
+  </link>
+
+  <!-- Chassis -->
+  <link name="chassis">
+    <visual>
+      <origin xyz="0 0 ${-chassis_height / 2}" rpy="0 0 ${degrees_90}"/>
+      <geometry>
+        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="0.0055 0.0055 0.0055"/> -->
+        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
+      </geometry>
+      <material name="chassis_mat"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${-chassis_height / 2}"/>
+      <geometry>
+        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
+      </geometry>
+    </collision>
+
+    <xacro:solid_cuboid_inertial
+        width="${chassis_length}" depth="${chassis_width}"
+        height="${chassis_height}" mass="${chassis_mass}">
+      <origin xyz="0 0 ${-chassis_height / 2}"/>
+    </xacro:solid_cuboid_inertial>
+  </link>
+
+  <!-- Ouster/Realsense/IMU Mounting plate -->
+  <link name="mounting_plate">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${mp_width} ${mp_length} ${mp_height}"/>
+      </geometry>
+      <material name="chassis_mat"/>
+    </visual>
+  </link>
+
+  <!-- Ouster riser plate -->
+  <link name="ouster_riser_plate">
+    <visual>
+      <origin xyz="0.0 0.0 0.0"/>
+      <geometry>
+        <box size="${ouster_riser_width} ${ouster_riser_length} ${ouster_riser_height}"/>
+      </geometry>
+      <material name="chassis_mat"/>
+    </visual>
+  </link>
+
+  <!-- Ouster lidar sensor -->
+  <link name="os_sensor">
+    <visual>
+        <origin xyz="-0.045 0.04 ${-ouster_height/2}" rpy="${degrees_90} 0 ${degrees_90}"/>
+        <geometry>
+          <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/os_sensor.dae"  scale="-0.001 0.001 0.001"/>
+        </geometry>
+        <material name="chassis_mat"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0.04 0.04 ${-ouster_height/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${ouster_dia/2}" length="${ouster_height}"/>
+        </geometry>
+      </collision>
+
+      <!-- Inertial properties -->
+      <!-- need to make an intertial property for a cylinder-->
+      <!-- xacro:thick_walled_tube_inertial inner_rad="${hub_dia/2}" outer_rad="${tire_dia/2}" height="${ouster_height}" mass="${ouster_mass}"/ -->
+  </link>
+
+  <!-- LORD IMU sensor -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0.0222 0.024465 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06858 0.07595 0.01331"/>
+      </geometry>
+      <material name="chassis_mat"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.0222 0.024465 0"/>
+      <geometry>
+        <box size="0.16858 0.07595 0.01331"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="gnss_1_antenna_link">
+    <visual>
+        <origin xyz="0.00 0.00 0.00" rpy="0 0 0"/>
+        <geometry>
+          <box size="${ouster_riser_width} ${ouster_riser_length} ${ouster_riser_height}"/>
+        </geometry>
+      </visual>
+  </link>
+
+  <link name="gnss_2_antenna_link">
+    <visual>
+        <origin xyz="0.00 0.00 0.00" rpy="0 0 0"/>
+        <geometry>
+          <box size="${ouster_riser_width} ${ouster_riser_length} ${ouster_riser_height}"/>
+        </geometry>
+      </visual>
+  </link>
+
+  <!-- Intel Realsense sensor -->
+  <link name="camera_link">
+    <visual>
+        <origin xyz="0.00 0.00 0.00" rpy="${degrees_90} 0 ${degrees_90}"/>
+        <geometry>
+          <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/d435.dae"  scale="1.0 1.0 1.0"/>
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0.00 0.00 0.00" rpy="${degrees_90} 0 ${degrees_90}"/>
+        <geometry>
+          <cylinder radius="${ouster_dia/2}" length="${ouster_height}"/>
+        </geometry>
+      </collision>
+  </link>
+
+  <joint name="base_link_to_chassis" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <joint name="chassis_to_mountplate" type="fixed">
+    <parent link="chassis"/>
+    <child link="mounting_plate"/>
+    <origin xyz="0.35 0.0 0.08" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="mountplate_to_ouster_riser" type="fixed">
+    <parent link="mounting_plate"/>
+    <child link="ouster_riser_plate"/>
+    <origin xyz="${mp_width * 0.15} 0.0 ${ouster_riser_height/2 + mp_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="ouster_riser_to_ouster" type="fixed">
+    <parent link="ouster_riser_plate"/>
+    <child link="os_sensor"/>
+    <origin xyz="0.0 0.0 ${ouster_riser_height/2 + 0.04}" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="mountplate_to_imu" type="fixed">
+    <parent link="mounting_plate"/>
+    <child link="imu_link"/>
+    <origin xyz="-0.04 0.01557 ${mp_height/2 + 0.01331/2}" rpy="0 0 ${2*degrees_90}"/>
+  </joint>
+
+  <joint name="imu_to_gnss_1" type="fixed">
+    <parent link="imu_link"/>
+    <child link="gnss_1_antenna_link"/>
+    <origin xyz="0.699328 0.187165 -0.21559" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="imu_to_gnss_2" type="fixed">
+    <parent link="imu_link"/>
+    <child link="gnss_2_antenna_link"/>
+    <origin xyz="0.699328 -0.161923 -0.21559" rpy="0 0 0"/>
+  </joint>
+
+  <joint name="mountplate_to_realsense" type="fixed">
+    <parent link="mounting_plate"/>
+    <child link="camera_link"/>
+    <origin xyz="0.2 -0.02 -0.023" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Wheels -->
+  <xacro:front_wheel lr_prefix="left" fr_prefix="front"
+                     lr_reflect="1" fr_reflect="1"/>
+  <xacro:front_wheel lr_prefix="right" fr_prefix="front"
+                     lr_reflect="-1" fr_reflect="1"/>
+  <xacro:rear_wheel lr_prefix="left" fr_prefix="rear"
+                    lr_reflect="1" fr_reflect="-1"/>
+  <xacro:rear_wheel lr_prefix="right" fr_prefix="rear"
+                    lr_reflect="-1" fr_reflect="-1"/>
+</robot>
