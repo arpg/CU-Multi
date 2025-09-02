@@ -15,74 +15,37 @@ def get_robot(root_path, env, robot_name):
     # Paths to bags for particular robo
     lidar_path = os.path.join(
         robot_dir, 
-        f"{robot_name}_{env}_lidar", 
-        f"{robot_name}_{env}_lidar_0.db3"
+        f"{robot_name}_{env}_lidar_poses_CSV", 
+        f"{robot_name}_{env}_lidar_poses_CSV_0.db3"
     )
-    poses_bag_path = os.path.join(
-        robot_dir,
-        f"{robot_name}_{env}_poses_CSV_NEW",
-        f"{robot_name}_{env}_poses_CSV_NEW_0.db3"
-    )
-    # poses_bag_path = os.path.join(
-    #     robot_dir,
-    #     f"{robot_name}_{env}_poses",
-    #     f"{robot_name}_{env}_poses_0.db3"
-    # )
 
     robot_lidar_bag_play = ExecuteProcess(
         cmd=['ros2', 'bag', 'play', lidar_path],
         output = 'screen'
     )
-    robot_pose_bag_play = ExecuteProcess(
-        cmd=['ros2', 'bag', 'play', poses_bag_path, '--clock'],
-        output = 'screen'
-    )
 
-    # Publish URDF for robot
-    xacro_file = PathJoinSubstitution(
-        [FindPackageShare('lidar2osm_ros'), 'urdf', 'multi_robot.urdf.xacro']
-    )
-    xacro_command = Command(
-        ['xacro ', xacro_file, ' ', 'name:=', f"{robot_name}"]
-    )
-    robot_urdf = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name=f'{robot_name}_robot_state_publisher',
-        parameters=[{'robot_description': xacro_command}],
-        remappings=[('/robot_description', f'/{robot_name}/robot_description')]
-    )
-
-    # IMU_TO_LIDAR = {
-    #     "x": -0.06286,
-    #     "y":  0.01557,
-    #     "z":  0.053345,
-    #     "roll":  0.0,
-    #     "pitch": 0.0,
-    #     "yaw":   pi,   # 180 deg about Z
-    # }
-
-    # # --- NEW: static TF IMU -> LiDAR ---
-    # imu_to_lidar_tf = Node(
-    #     package='tf2_ros',
-    #     executable='static_transform_publisher',
-    #     name=f'{robot_name}_imu_to_lidar_tf',
-    #     # args order: x y z roll pitch yaw parent child
-    #     arguments=[
-    #         str(IMU_TO_LIDAR["x"]), str(IMU_TO_LIDAR["y"]), str(IMU_TO_LIDAR["z"]),
-    #         str(IMU_TO_LIDAR["roll"]), str(IMU_TO_LIDAR["pitch"]), str(IMU_TO_LIDAR["yaw"]),
-    #         f'{robot_name}_imu_link', f'{robot_name}_os_sensor'
-    #     ],
-    #     output='screen'
+    # # Publish URDF for robot
+    # xacro_file = PathJoinSubstitution(
+    #     [FindPackageShare('lidar2osm_ros'), 'urdf', 'multi_robot.urdf.xacro']
+    # )
+    # xacro_command = Command(
+    #     ['xacro ', xacro_file, ' ', 'name:=', f"{robot_name}"]
+    # )
+    # robot_urdf = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     name=f'{robot_name}_robot_state_publisher',
+    #     parameters=[{'robot_description': xacro_command}],
+    #     remappings=[('/robot_description', f'/{robot_name}/robot_description')]
     # )
 
-    return [robot_urdf, robot_pose_bag_play, robot_lidar_bag_play]
+    return [robot_lidar_bag_play]
 
 
 def generate_launch_description():
     environment = "main_campus"
-    robot_names = ["robot1"]
-    root_path = f"/home/donceykong/Data/cu_multi"
+    robot_names = ["robot1", "robot2"]
+    root_path = f"/media/donceykong/doncey_ssd_03/CU_MULTI"
 
     ld = LaunchDescription()
 
