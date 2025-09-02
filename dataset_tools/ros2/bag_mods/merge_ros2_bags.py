@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 import heapq
 import rosbag2_py
@@ -51,7 +52,20 @@ def merge_bags(input_paths, output_path):
             heapq.heappush(heap, (t2, topic2, data2, reader))
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("Usage: merge_bags.py <bag1> <bag2> <output_bag>")
-        sys.exit(1)
-    merge_bags(sys.argv[1:3], sys.argv[3])
+    # if len(sys.argv) < 3:
+    #     print("Usage: merge_bags.py <bag1> <bag2> <output_bag>")
+    #     sys.exit(1)
+    # merge_bags(sys.argv[1:3], sys.argv[3])
+
+    data_root = "/media/donceykong/doncey_ssd_03/CU_MULTI"
+    env = "main_campus"
+    robots = [1, 2, 3]
+
+    for robot in robots:
+        bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
+        bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
+        bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses_CSV")
+        merged_bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
+
+        in_bags = [bag1, bag2]
+        merge_bags(in_bags, merged_bag)
