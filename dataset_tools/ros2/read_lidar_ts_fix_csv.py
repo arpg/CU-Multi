@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """
-print_ouster_timestamps.py
-
 Read a ROS 2 bag and, for every message from the topic "ouster/points",
 print the message header timestamp and the bag-recorded timestamp.
 
@@ -14,16 +12,15 @@ Usage:
 import os
 import argparse
 import csv
+import numpy as np
+
 from decimal import Decimal
 from collections import namedtuple
-
 from datetime import datetime, timezone
 
 from rosbag2_py import SequentialReader, StorageOptions, ConverterOptions
 from rclpy.serialization import deserialize_message
 from rosidl_runtime_py.utilities import get_message
-
-import numpy as np
 
 def ns_to_iso(ns: int) -> str:
     """Convert nanoseconds since Unix epoch to ISO 8601 (UTC)."""
@@ -58,6 +55,7 @@ def load_csv_poses(path):
 
     return times, positions, quaternions
 
+
 def save_csv_poses(out_path, times, positions, quaternions):
     with open(out_path, "w", newline="") as f:
         writer = csv.writer(f)
@@ -70,32 +68,12 @@ def save_csv_poses(out_path, times, positions, quaternions):
                 quat[0], quat[1], quat[2], quat[3]
             ])
 
-def main():
-    parser = argparse.ArgumentParser(description="Print timestamps for messages on a topic from a ROS 2 bag.")
-    parser.add_argument("--env", default="main_campus", 
-                        help="Environment from CU-Multi Dataset.")
-    parser.add_argument("--robot_name", default="robot2", 
-                        help="Robot name. Such as 'robot1', 'robot2', 'robot3', or 'robot4'.")
-    parser.add_argument("--topic", default="ouster/points",
-                        help='Topic name (with or without leading "/"). Default: ouster/points')
-    args = parser.parse_args()
 
-    # Root Data directory and CSV to fix
-    root_path = "/home/donceykong/Data/cu_multi"
-    robot_dir = os.path.join(root_path, args.env, args.robot_name)
-    in_csv = os.path.join(robot_dir, 
-                          f"main_campus_{args.robot_name}_ref_NEW.csv")
-    out_csv = os.path.join(robot_dir, 
-                           f"main_campus_{args.robot_name}_ref_NEW_aligned.csv")
-    bag_path = os.path.join(robot_dir, 
-                            f"{args.robot_name}_{args.env}_lidar", 
-                            f"{args.robot_name}_{args.env}_lidar_0.db3")
-
+def fix_csv(bag_path, in_csv, out_csv):
     # Open the bag
     reader = SequentialReader()
     storage_options = StorageOptions(uri=bag_path, storage_id="")  # empty = auto-detect (sqlite3/mcap)
-    converter_options = ConverterOptions(input_serialization_format="cdr",
-                                         output_serialization_format="cdr")
+    converter_options = ConverterOptions(input_serialization_format="cdr", output_serialization_format="cdr")
     reader.open(storage_options, converter_options)
 
     # Map topic -> type
@@ -133,13 +111,6 @@ def main():
 
         print(f"\nCount: {count}, Timestamp: {header_sec}")
 
-        # if header_ns is not None:
-        #     print(f"header_stamp_ns={header_ns}  header_stamp_iso={ns_to_iso(header_ns)}  "
-        #           f"| bag_stamp_ns={bag_ns}  bag_stamp_iso={ns_to_iso(bag_ns)}")
-        # else:
-        #     # Fallback if message lacks a header or stamp
-        #     print(f"(no header.stamp)  bag_stamp_ns={bag_ns}  bag_stamp_iso={ns_to_iso(bag_ns)}")
-
         lidar_timestamps.append(header_sec)
         count += 1
     print(f"Total messages on {topic_name}: {count}")
@@ -157,6 +128,28 @@ def main():
 
     save_csv_poses(out_csv, times, positions, quaternions)
     print(f"Saved aligned poses to {out_csv}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Print timestamps for messages on a topic from a ROS 2 bag.")
+    parser.add_argument("--env", default="main_campus", 
+                        help="Environment from CU-Multi Dataset.")
+    parser.add_argument("--robot_name", default="robot2", 
+                        help="Robot name. Such as 'robot1', 'robot2', 'robot3', or 'robot4'.")
+    parser.add_argument("--topic", default="ouster/points",
+                        help='Topic name (with or without leading "/"). Default: ouster/points')
+    args = parser.parse_args()
+
+    # Root Data directory and CSV to fix
+    root_path = "/media/donceykong/doncey_ssd_03/CU_MULTI"
+    robot_dir = os.path.join(root_path, args.env, args.robot_name)
+    in_csv = os.path.join(robot_dir, 
+                          f"main_campus_{args.robot_name}_ref_NEW.csv")
+    out_csv = os.path.join(robot_dir, 
+                           f"main_campus_{args.robot_name}_ref_NEW_aligned.csv")
+    bag_path = os.path.join(robot_dir, 
+                            f"{args.robot_name}_{args.env}_lidar", 
+                            f"{args.robot_name}_{args.env}_lidar_0.db3")
 
 
 if __name__ == "__main__":
