@@ -59,13 +59,25 @@ if __name__ == '__main__':
 
     data_root = "/media/donceykong/doncey_ssd_03/CU_MULTI"
     env = "main_campus"
-    robots = [1, 2, 3]
+    robots = [1, 2] #, 3]
 
+    # for robot in robots:
+    #     bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
+    #     bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
+    #     bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses_CSV")
+    #     merged_bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
+
+    #     in_bags = [bag1, bag2]
+    #     merge_bags(in_bags, merged_bag)
+    
+    in_bags = []
+    merged_bag = os.path.join(data_root, f"{env}", f"{env}_merged_bag_OG")
     for robot in robots:
         bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
+        # bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
         bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
-        bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses_CSV")
-        merged_bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
+        bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses")
+        in_bags.append(bag1)
+        in_bags.append(bag2)
 
-        in_bags = [bag1, bag2]
-        merge_bags(in_bags, merged_bag)
+    merge_bags(in_bags, merged_bag)
