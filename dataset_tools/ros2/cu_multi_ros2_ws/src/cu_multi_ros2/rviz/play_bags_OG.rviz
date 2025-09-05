@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /robots1/robot21/robot2/global_pc1
         - /TF1/Frames1
       Splitter Ratio: 0.6178343892097473
     Tree Height: 1250
@@ -84,7 +85,7 @@ Visualization Manager:
               Use Fixed Frame: true
               Use rainbow: true
               Value: true
-            - Alpha: 0.5
+            - Alpha: 1
               Autocompute Intensity Bounds: true
               Autocompute Value Bounds:
                 Max Value: 10.166093826293945
@@ -142,6 +143,94 @@ Visualization Manager:
                 Expand Link Details: false
                 Expand Tree: false
                 Link Tree Style: Links in Alphabetic Order
+                robot1_base_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_camera_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_chassis:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_gnss_1_antenna_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_gnss_2_antenna_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_imu_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_left_front_axle_carrier:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_left_front_wheel:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_left_rear_axle_carrier:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_left_rear_wheel:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_left_steering_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_mounting_plate:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_os_sensor:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_ouster_riser_plate:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_right_front_axle_carrier:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_right_front_wheel:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_right_rear_axle_carrier:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                robot1_right_rear_wheel:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
+                  Value: true
+                robot1_right_steering_link:
+                  Alpha: 1
+                  Show Axes: false
+                  Show Trail: false
               Mass Properties:
                 Inertia: false
                 Mass: false
@@ -215,7 +304,7 @@ Visualization Manager:
               Use Fixed Frame: true
               Use rainbow: true
               Value: true
-            - Alpha: 0.5
+            - Alpha: 1
               Autocompute Intensity Bounds: true
               Autocompute Value Bounds:
                 Max Value: 10
@@ -626,43 +715,79 @@ Visualization Manager:
               Value: false
           Enabled: false
           Name: robot4
-      Enabled: false
-      Name: robots
-    - Class: rviz_default_plugins/TF
       Enabled: true
+      Name: robots
+    - Class: rviz_common/Group
+      Displays:
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /robot1/occupied_cells_vis_array
+          Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /robot2/occupied_cells_vis_array
+          Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /robot3/occupied_cells_vis_array
+          Value: true
+        - Class: rviz_default_plugins/MarkerArray
+          Enabled: true
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /robot4/occupied_cells_vis_array
+          Value: true
+      Enabled: false
+      Name: occupancy
+    - Class: rviz_default_plugins/TF
+      Enabled: false
       Filter (blacklist): ""
       Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        robot1_map:
-          Value: true
-        robot1_os_sensor:
-          Value: true
-        robot2_map:
-          Value: true
-        robot2_os_sensor:
-          Value: true
-        world:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          robot1_map:
-            robot1_os_sensor:
-              {}
-          robot2_map:
-            robot2_os_sensor:
-              {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
-    Background Color: 119; 118; 123
+    Background Color: 240; 240; 240
     Fixed Frame: world
     Frame Rate: 60
   Name: root
@@ -705,34 +830,29 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz_default_plugins/Orbit
-      Distance: 231.060791015625
+      Angle: 0.07999999821186066
+      Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: -5.542038917541504
-        Y: 9.826823234558105
-        Z: 33.76802444458008
-      Focal Shape Fixed Size: false
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
-      Target Frame: robot2_map
-      Value: Orbit (rviz_default_plugins)
-      Yaw: 4.682215213775635
+      Scale: 6.133357048034668
+      Target Frame: world
+      Value: TopDownOrtho (rviz_default_plugins)
+      X: 154.6053009033203
+      Y: 76.84326171875
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: false
-  Height: 1662
-  Hide Left Dock: false
+    collapsed: true
+  Height: 2022
+  Hide Left Dock: true
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd000000040000000000000313000005defc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b200fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000070000005de0000018600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015d000005defc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000070000005de0000013800fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000005e80000005afc0100000002fb0000000800540069006d00650000000000000005e80000047a00fffffffb0000000800540069006d0065010000000000000450000000000000000000000821000005de00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000313000005defc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b200fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730000000070000005de0000018600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015d00000746fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000070000007460000013800fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000005e80000005afc0100000002fb0000000800540069006d00650000000000000005e80000047a00fffffffb0000000800540069006d0065010000000000000450000000000000000000000f000000074600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -741,6 +861,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 2880
+  Width: 3840
   X: 0
   Y: 64
