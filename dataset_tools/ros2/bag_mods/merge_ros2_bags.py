@@ -52,14 +52,9 @@ def merge_bags(input_paths, output_path):
             heapq.heappush(heap, (t2, topic2, data2, reader))
 
 if __name__ == '__main__':
-    # if len(sys.argv) < 3:
-    #     print("Usage: merge_bags.py <bag1> <bag2> <output_bag>")
-    #     sys.exit(1)
-    # merge_bags(sys.argv[1:3], sys.argv[3])
-
-    data_root = "/media/donceykong/doncey_ssd_03/CU_MULTI"
+    data_root = "/home/donceykong/Data/cu_multi"
     env = "main_campus"
-    robots = [1, 2] #, 3]
+    robots = [1, 2]
 
     # for robot in robots:
     #     bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
@@ -71,13 +66,14 @@ if __name__ == '__main__':
     #     merge_bags(in_bags, merged_bag)
     
     in_bags = []
-    merged_bag = os.path.join(data_root, f"{env}", f"{env}_merged_bag_OG")
+    merged_bag = os.path.join(data_root, f"{env}", f"{env}_merged_bag_NEW")
     for robot in robots:
         bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
-        # bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
-        bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
-        bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses")
-        in_bags.append(bag1)
-        in_bags.append(bag2)
+        bag = os.path.join(bag_dir, f"robot{robot}_{env}_lidar_poses_CSV")
+        in_bags.append(bag)
+        # bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
+        # bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_poses")
+        # in_bags.append(bag1)
+        # in_bags.append(bag2)
 
     merge_bags(in_bags, merged_bag)
