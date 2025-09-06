@@ -44,10 +44,10 @@ def get_robot(root_path, env, robot_name):
 
 
 def generate_launch_description():
-    USING_OG = True
+    USING_OG = False
     env = "main_campus"
     robot_names = ["robot1", "robot2"]
-    root_path = f"/media/donceykong/doncey_ssd_03/CU_MULTI"
+    root_path = f"/home/donceykong/Data/cu_multi"
 
     ld = LaunchDescription()
 
@@ -68,10 +68,10 @@ def generate_launch_description():
             output = 'screen'
         )
     else:
-        merged_bag = os.path.join(root_path, f"{env}", f"{env}_merged_bag")
+        merged_bag = os.path.join(root_path, f"{env}", f"{env}_merged_bag_NEW")
         merged_bag_path = os.path.join(
             f"{merged_bag}", 
-            f"{env}_merged_bag_0.db3"
+            f"{env}_merged_bag_NEW_0.db3"
         )
         merged_bag_play = ExecuteProcess(
             cmd=['ros2', 'bag', 'play', merged_bag_path],

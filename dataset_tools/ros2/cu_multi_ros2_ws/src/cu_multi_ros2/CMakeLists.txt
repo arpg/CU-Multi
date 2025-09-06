@@ -44,7 +44,7 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 # ament_target_dependencies(robot_distance_checker rclcpp sensor_msgs nav_msgs tf2_ros visualization_msgs)
 
 # Robot map accumulator node
-add_executable(robot_map_accumulator src/robot_map_accumulator.cc)
+add_executable(robot_map_accumulator src/robot_map_accumulator_deskew.cc)
 ament_target_dependencies(robot_map_accumulator rclcpp sensor_msgs nav_msgs tf2_ros tf2_geometry_msgs tf2_eigen pcl_conversions)
 
 # # Robot map reciever node
