@@ -103,9 +103,9 @@ PoseRecord = namedtuple("PoseRecord", ["time", "position", "orientation"])
 if __name__ == "__main__":
     rclpy.init()
 
-    data_root = "/media/donceykong/doncey_ssd_03/CU_MULTI"
+    data_root = "/home/donceykong/Data/cu_multi"
     env = "main_campus"
-    robots = [1, 2, 3]
+    robots = [1, 2]
 
     # IMU -> LiDAR extrinsic (IMU frame to LiDAR frame)
     IMU_TO_LIDAR_T = np.array([-0.058038, 0.015573, 0.049603])
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         tf_topic      = "/tf"
 
         world_frame   = "world"
-        map_frame     = f"robot{robot}_map"
+        # map_frame     = f"robot{robot}_map"
         imu_frame     = f"robot{robot}_imu_link"
         lidar_frame   = f"robot{robot}_os_sensor"
 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
         # Rolling path message
         path_msg = Path()
-        path_msg.header.frame_id = map_frame
+        path_msg.header.frame_id = world_frame #map_frame
 
         p_map = origin_pos_imu + q_rotate_vec(origin_quat_imu, IMU_TO_LIDAR_T)
         q_map = q_multiply(origin_quat_imu, IMU_TO_LIDAR_Q)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
             # --- Odometry (map -> lidar_frame) ---
             # leave covariance, twist as zeros
             odom = Odometry()
-            odom.header.frame_id = map_frame
+            odom.header.frame_id = world_frame #map_frame
             odom.child_frame_id = lidar_frame
             odom.header.stamp = stamp_msg
             
@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
             # --- Path (in map frame, LiDAR poses) ---
             ps = PoseStamped()
-            ps.header.frame_id = map_frame
+            ps.header.frame_id = world_frame #map_frame
             ps.header.stamp = stamp_msg
             ps.pose.position.x = lidar_xyz[0]
             ps.pose.position.y = lidar_xyz[1]
@@ -224,22 +224,22 @@ if __name__ == "__main__":
             writer.write(path_topic, serialize_message(path_msg), stamp_ns)
 
             # --- TF ---
-            # world -> map (static)
-            tf_world_map = TransformStamped()
-            tf_world_map.header.frame_id = world_frame
-            tf_world_map.child_frame_id = map_frame
-            tf_world_map.header.stamp = stamp_msg
-            tf_world_map.transform.translation.x = p_world_map[0]
-            tf_world_map.transform.translation.y = p_world_map[1]
-            tf_world_map.transform.translation.z = p_world_map[2]
-            tf_world_map.transform.rotation.x = q_world_map[0]
-            tf_world_map.transform.rotation.y = q_world_map[1]
-            tf_world_map.transform.rotation.z = q_world_map[2]
-            tf_world_map.transform.rotation.w = q_world_map[3]
+            # # world -> map (static)
+            # tf_world_map = TransformStamped()
+            # tf_world_map.header.frame_id = world_frame
+            # tf_world_map.child_frame_id = map_frame
+            # tf_world_map.header.stamp = stamp_msg
+            # tf_world_map.transform.translation.x = p_world_map[0]
+            # tf_world_map.transform.translation.y = p_world_map[1]
+            # tf_world_map.transform.translation.z = p_world_map[2]
+            # tf_world_map.transform.rotation.x = q_world_map[0]
+            # tf_world_map.transform.rotation.y = q_world_map[1]
+            # tf_world_map.transform.rotation.z = q_world_map[2]
+            # tf_world_map.transform.rotation.w = q_world_map[3]
 
             # world -> lidar (dynamic)
             tf_map_lidar = TransformStamped()
-            tf_map_lidar.header.frame_id = map_frame
+            tf_map_lidar.header.frame_id = world_frame #map_frame
             tf_map_lidar.child_frame_id = lidar_frame
             tf_map_lidar.header.stamp = stamp_msg
             tf_map_lidar.transform.translation.x = lidar_xyz[0]
@@ -276,7 +276,8 @@ if __name__ == "__main__":
             # tf_imu_lidar.transform.rotation.z = imu2lidar_quat_xyzw[2]
             # tf_imu_lidar.transform.rotation.w = imu2lidar_quat_xyzw[3]
 
-            tf_msg = TFMessage(transforms=[tf_world_map, tf_map_lidar])
+            # tf_msg = TFMessage(transforms=[tf_world_map, tf_map_lidar])
+            tf_msg = TFMessage(transforms=[tf_map_lidar])
             writer.write(tf_topic, serialize_message(tf_msg), stamp_ns)
 
         # Done
