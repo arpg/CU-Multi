@@ -24,16 +24,18 @@ public:
       // Params
       this->declare_parameter<std::string>("map_frame", "world");
       this->declare_parameter<double>("resolution", 1.0f);
+      this->declare_parameter<double>("tf_timeout_sec", 0.05);
 
       // Construct dynamic topics using robot_name
       pointcloud_topic_ = "/" + robot_name + "/ouster/points";
       // pointcloud_topic_ = "/" + robot_name + "/ouster/semantic_points";
-      robot_frame_ = robot_name + "_base_link";
+      // robot_frame_ = robot_name + "_base_link";
 
       // Retrieve params
       map_frame_ = this->get_parameter("map_frame").as_string();
       resolution_ = this->get_parameter("resolution").as_double();
-
+      tf_timeout_sec_   = this->get_parameter("tf_timeout_sec").as_double();
+      
       // Subscriber and publishers
       pointcloud_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
           pointcloud_topic_, rclcpp::SensorDataQoS(),
@@ -45,9 +47,16 @@ public:
 private:
   void pointCloudCallback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg) {
     try {
-      // Get the transform from the robot frame to the map frame
-      geometry_msgs::msg::TransformStamped transform_stamped =
-          tf_buffer_.lookupTransform(map_frame_, cloud_msg->header.frame_id, tf2::TimePointZero);
+
+      geometry_msgs::msg::TransformStamped transform_stamped = tf_buffer_.lookupTransform(
+          map_frame_, cloud_msg->header.frame_id,
+          rclcpp::Time(cloud_msg->header.stamp),
+          rclcpp::Duration::from_seconds(tf_timeout_sec_)
+      );
+
+      // // Get the transform from the robot frame to the map frame
+      // geometry_msgs::msg::TransformStamped transform_stamped =
+      //     tf_buffer_.lookupTransform(map_frame_, cloud_msg->header.frame_id, tf2::TimePointZero);
 
       // Convert PointCloud2 to PCL
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -92,7 +101,7 @@ private:
       publishMapAndPointCloud(globalMap);
 
       // LOCAL CLOUD
-      double max_range_ = 100.0; // radius of local map
+      double max_range_ = 1000.0; // radius of local map
       Eigen::Vector3f center = transform.translation().cast<float>();
       pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_sphere_filtered(new pcl::PointCloud<pcl::PointXYZRGB>());
       for (const auto& point : aggregated_cloud_->points) {
@@ -130,11 +139,10 @@ private:
     local_map_pub_->publish(localMap_pc2);
   }
 
-
   // Parameters
   std::string pointcloud_topic_;
   std::string map_frame_;
-  std::string robot_frame_;
+  // std::string robot_frame_;
   double resolution_;
 
   // ROS 2 components
@@ -144,6 +152,7 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   // Transform listener
+  double tf_timeout_sec_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
