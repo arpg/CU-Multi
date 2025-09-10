@@ -10,11 +10,10 @@ from rosbag2_py import (
     TopicMetadata
 )
 
-def merge_ros2_bags(ros2_bags,
-                    output_bag: str,
-                    storage_id: str = 'sqlite3'):
+def merge_ros2_bags(ros2_bags, output_bag: str, storage_id: str = 'sqlite3'):
+    """Function to merge a list of bags into a final bag for playback"""
 
-    # --- STEP 2: scan metadata to register topics
+    # --- STEP 1: scan metadata to register topics
     print("\n\n 2. SCANNING.")
     topic_types = {}
     for bag in ros2_bags:
@@ -90,18 +89,51 @@ def merge_ros2_bags(ros2_bags,
 
     print(f"✅ Merged {count} messages into '{output_bag}' in chronological order.")
 
+
 if __name__ == '__main__':
-    data_root = "/home/donceykong/Data/cu_multi"
-    env = "main_campus"
-    robots = [1, 2]
 
-    in_bags = []
-    merged_bag = os.path.join(data_root, f"{env}", f"{env}_merged_bag_NEW")
+    DATA_ROOT = os.getenv("CU_MULTI_ROOT")
+    if DATA_ROOT is None:
+        sys.exit(
+            "ERROR: Environment variable CU_MULTI_ROOT is not set.\n"
+            "Please set it before running the script, e.g.:\n"
+            "  export CU_MULTI_ROOT=/your/custom/path\n"
+        )
+    print("CU_MULTI_ROOT is:", DATA_ROOT)
+
+    env = "kittredge_loop"
+    robots = [1, 2, 3, 4]
+
+    CREATE_ROBOT_BAG = False
+    CREATE_ENV_BAG = True
+    SENSORS = ["lidar", "poses_CSV"] # [lidar, poses, rgb, depth, gps]
+
+    if CREATE_ENV_BAG:
+        env_bags = []
+        robots_string = "_".join(map(str, robots))
+        env_bag_path = os.path.join(DATA_ROOT, f"{env}", f"{env}_robots{robots_string}_merged_bag")
+
+        robots_info_string = ", ".join(map(str, robots))
+        print(f"\nCreating {env} ENVIRONMENT bag with robots {robots_info_string}.")
+        print(f"    - Path: {env_bag_path}")
+
     for robot in robots:
-        bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
-        bag1 = os.path.join(bag_dir, f"robot{robot}_{env}_poses_CSV")
-        bag2 = os.path.join(bag_dir, f"robot{robot}_{env}_lidar")
-        in_bags.append(bag1)
-        in_bags.append(bag2)
+        robot_bags = []
+        robot_dir = os.path.join(DATA_ROOT, f"{env}/robot{robot}")
+        for sensor in SENSORS:
+            sensor_bag = os.path.join(robot_dir, f"robot{robot}_{env}_{sensor}")
+            robot_bags.append(sensor_bag)
 
-    merge_ros2_bags(in_bags, merged_bag)
+        if CREATE_ROBOT_BAG:
+            sensors_string = "_".join(map(str, SENSORS))
+            robot_bag_path = os.path.join(robot_dir, f"robot{robot}_{env}_{sensors_string}")
+
+            sensors_INFO_string = ", ".join(map(str, SENSORS))
+            print(f"\nCreating {env} ROBOT{robot} bag with sensors {sensors_INFO_string}.")
+            print(f"    - Path: {robot_bag_path}")
+            merge_ros2_bags(env_bags, robot_bag_path)
+            
+        if CREATE_ENV_BAG:
+            env_bags.extend(robot_bags)
+
+    merge_ros2_bags(env_bags, env_bag_path)
