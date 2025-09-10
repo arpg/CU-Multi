@@ -8,9 +8,9 @@ from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitut
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.parameter_descriptions import ParameterValue
 
-def get_robot(root_path, env, robot_name):
+def get_robot(DATA_ROOT, env, robot_name):
     # Root directory path to robot instance
-    # robot_dir = os.path.join(root_path, env, robot_name)
+    # robot_dir = os.path.join(DATA_ROOT, env, robot_name)
 
     # # Paths to bags for particular robo
     # lidar_path = os.path.join(
@@ -44,10 +44,19 @@ def get_robot(root_path, env, robot_name):
 
 
 def generate_launch_description():
+
+    DATA_ROOT = os.getenv("CU_MULTI_ROOT")
+    if DATA_ROOT is None:
+        sys.exit(
+            "ERROR: Environment variable CU_MULTI_ROOT is not set.\n"
+            "Please set it before running the script, e.g.:\n"
+            "  export CU_MULTI_ROOT=/your/custom/path\n"
+        )
+    print("CU_MULTI_ROOT is:", DATA_ROOT)
+
     USING_OG = False
-    env = "main_campus"
-    robot_names = ["robot1", "robot2"]
-    root_path = f"/home/donceykong/Data/cu_multi"
+    env = "kittredge_loop"
+    robot_names = ["robot4"]
 
     ld = LaunchDescription()
 
@@ -58,7 +67,7 @@ def generate_launch_description():
     ))
 
     if USING_OG:
-        merged_bag = os.path.join(root_path, f"{env}", f"{env}_merged_bag_OG")
+        merged_bag = os.path.join(DATA_ROOT, f"{env}", f"{env}_merged_bag_OG")
         merged_bag_path = os.path.join(
             f"{merged_bag}", 
             f"{env}_merged_bag_OG_0.db3"
@@ -68,10 +77,10 @@ def generate_launch_description():
             output = 'screen'
         )
     else:
-        merged_bag = os.path.join(root_path, f"{env}", f"{env}_merged_bag_NEW")
+        merged_bag = os.path.join(DATA_ROOT, f"{env}", f"{env}_robots1_2_3_4_merged_bag")
         merged_bag_path = os.path.join(
             f"{merged_bag}", 
-            f"{env}_merged_bag_NEW_0.db3"
+            f"{env}_robots1_2_3_4_merged_bag_0.db3"
         )
         merged_bag_play = ExecuteProcess(
             cmd=['ros2', 'bag', 'play', merged_bag_path],
@@ -81,7 +90,7 @@ def generate_launch_description():
 
     if USING_OG:
         for robot_name in robot_names:
-            for action in get_robot(root_path, env, robot_name):
+            for action in get_robot(DATA_ROOT, env, robot_name):
                 ld.add_action(action)
     
     for robot_name in robot_names:

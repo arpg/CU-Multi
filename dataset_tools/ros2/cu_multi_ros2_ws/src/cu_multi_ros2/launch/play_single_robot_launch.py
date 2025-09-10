@@ -10,10 +10,18 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
-    USING_OG = True
-    env = "main_campus"
+
+    DATA_ROOT = os.getenv("CU_MULTI_ROOT")
+    if DATA_ROOT is None:
+        sys.exit(
+            "ERROR: Environment variable CU_MULTI_ROOT is not set.\n"
+            "Please set it before running the script, e.g.:\n"
+            "  export CU_MULTI_ROOT=/your/custom/path\n"
+        )
+    print("CU_MULTI_ROOT is:", DATA_ROOT)
+
+    env = "kittredge_loop"
     robot_names = ["robot1"]
-    root_path = f"/home/donceykong/Data/cu_multi"
 
     ld = LaunchDescription()
 
@@ -24,27 +32,27 @@ def generate_launch_description():
     ))
     
     for robot_name in robot_names:
-        merged_bag = os.path.join(root_path, 
+        merged_bag = os.path.join(DATA_ROOT, 
                                   f"{env}", 
                                   f"{robot_name}", 
-                                  f"{robot_name}_{env}_lidar_poses_CSV")
+                                  f"{robot_name}_{env}_camera_rgb")
         lidar_path = os.path.join(
             f"{merged_bag}", 
-            f"{robot_name}_{env}_lidar_poses_CSV_0.db3"
+            f"{robot_name}_{env}_camera_rgb.db3"
         )
 
         robot_lidar_bag_play = ExecuteProcess(
             cmd=['ros2', 'bag', 'play', lidar_path],
             output = 'screen'
         )
-
-        robot_map_accumulator_node = Node(
-            package='lidar2osm_ros',
-            executable='robot_map_accumulator',
-            arguments=[robot_name],  # Pass the robot name as an argument
-        )
         ld.add_action(robot_lidar_bag_play)
-        ld.add_action(robot_map_accumulator_node)
+
+        # robot_map_accumulator_node = Node(
+        #     package='lidar2osm_ros',
+        #     executable='robot_map_accumulator',
+        #     arguments=[robot_name],  # Pass the robot name as an argument
+        # )
+        # ld.add_action(robot_map_accumulator_node)
 
     
     # delayed RViz
@@ -52,7 +60,7 @@ def generate_launch_description():
         package='rviz2', executable='rviz2', name='rviz2',
         output='screen',
         arguments=['-d', PathJoinSubstitution([
-            FindPackageShare('lidar2osm_ros'), 'rviz', 'play_bags.rviz'
+            FindPackageShare('lidar2osm_ros'), 'rviz', 'play_cam.rviz'
         ])]
     )
     ld.add_action(TimerAction(period=5.0, actions=[rviz]))
