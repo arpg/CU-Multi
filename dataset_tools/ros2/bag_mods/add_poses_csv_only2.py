@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os, csv, time
+import os, csv, time, sys
 from collections import namedtuple
 
 import numpy as np
@@ -103,13 +103,22 @@ PoseRecord = namedtuple("PoseRecord", ["time", "position", "orientation"])
 if __name__ == "__main__":
     rclpy.init()
 
-    data_root = "/home/donceykong/Data/cu_multi"
-    env = "main_campus"
-    robots = [1, 2]
+    data_root = os.getenv("CU_MULTI_ROOT")
+    if data_root is None:
+        sys.exit(
+            "ERROR: Environment variable CU_MULTI_ROOT is not set.\n"
+            "Please set it before running the script, e.g.:\n"
+            "  export CU_MULTI_ROOT=/your/custom/path\n"
+        )
+    print("CU_MULTI_ROOT is:", data_root)
+
+    env = "kittredge_loop"
+    robots = [1, 2, 3, 4]
 
     # IMU -> LiDAR extrinsic (IMU frame to LiDAR frame)
     IMU_TO_LIDAR_T = np.array([-0.058038, 0.015573, 0.049603])
     IMU_TO_LIDAR_Q = q_normalize([0.0, 0.0, 1.0, 0.0])
+    SUBSAMPLE_N = 3  # write odom/path every third CSV row
 
     for robot in robots:
         bag_dir = os.path.join(data_root, f"{env}/robot{robot}")
@@ -123,7 +132,7 @@ if __name__ == "__main__":
         tf_topic      = "/tf"
 
         world_frame   = "world"
-        # map_frame     = f"robot{robot}_map"
+        map_frame     = f"robot{robot}_map"
         imu_frame     = f"robot{robot}_imu_link"
         lidar_frame   = f"robot{robot}_os_sensor"
 
@@ -169,7 +178,9 @@ if __name__ == "__main__":
         q_map = q_multiply(origin_quat_imu, IMU_TO_LIDAR_Q)
         p_world_map = p_map.tolist()
         q_world_map = q_map.tolist()
-        for t_s, p_imu, q_imu in zip(csv_times, csv_pos_imu, csv_quat_imu):
+        
+        # for t_s, p_imu, q_imu in zip(csv_times, csv_pos_imu, csv_quat_imu):
+        for i, (t_s, p_imu, q_imu) in enumerate(zip(csv_times, csv_pos_imu, csv_quat_imu)):
             # Compose LiDAR pose in map:  
             # T_map_lidar = T_map_imu * T_imu_lidar
             p_lidar = p_imu + q_rotate_vec(q_imu, IMU_TO_LIDAR_T)
@@ -188,42 +199,44 @@ if __name__ == "__main__":
             # Timestamp in ns (epoch if CSV looks like epoch; else start at 0)
             stamp_ns = secs_to_ns_epoch_or_rel(t_s, t0)
             stamp_msg = ns_to_time_msg(stamp_ns)
+    
+            # --- Odometry + Path (only every 3rd) ---
+            if i % SUBSAMPLE_N == 0:
+                # --- Odometry (map -> lidar_frame) ---
+                # leave covariance, twist as zeros
+                odom = Odometry()
+                odom.header.frame_id = world_frame #map_frame
+                odom.child_frame_id = lidar_frame
+                odom.header.stamp = stamp_msg
+                
+                odom.pose.pose.position.x = lidar_xyz[0]
+                odom.pose.pose.position.y = lidar_xyz[1]
+                odom.pose.pose.position.z = lidar_xyz[2]
+                odom.pose.pose.orientation.x = lidar_quat_xyzw[0]
+                odom.pose.pose.orientation.y = lidar_quat_xyzw[1]
+                odom.pose.pose.orientation.z = lidar_quat_xyzw[2]
+                odom.pose.pose.orientation.w = lidar_quat_xyzw[3]
+                
+                writer.write(odom_topic, serialize_message(odom), stamp_ns)
 
-            # --- Odometry (map -> lidar_frame) ---
-            # leave covariance, twist as zeros
-            odom = Odometry()
-            odom.header.frame_id = world_frame #map_frame
-            odom.child_frame_id = lidar_frame
-            odom.header.stamp = stamp_msg
-            
-            odom.pose.pose.position.x = lidar_xyz[0]
-            odom.pose.pose.position.y = lidar_xyz[1]
-            odom.pose.pose.position.z = lidar_xyz[2]
-            odom.pose.pose.orientation.x = lidar_quat_xyzw[0]
-            odom.pose.pose.orientation.y = lidar_quat_xyzw[1]
-            odom.pose.pose.orientation.z = lidar_quat_xyzw[2]
-            odom.pose.pose.orientation.w = lidar_quat_xyzw[3]
-            
-            writer.write(odom_topic, serialize_message(odom), stamp_ns)
+                # --- Path (in map frame, LiDAR poses) ---
+                ps = PoseStamped()
+                ps.header.frame_id = world_frame #map_frame
+                ps.header.stamp = stamp_msg
+                ps.pose.position.x = lidar_xyz[0]
+                ps.pose.position.y = lidar_xyz[1]
+                ps.pose.position.z = lidar_xyz[2]
+                ps.pose.orientation.x = lidar_quat_xyzw[0]
+                ps.pose.orientation.y = lidar_quat_xyzw[1]
+                ps.pose.orientation.z = lidar_quat_xyzw[2]
+                ps.pose.orientation.w = lidar_quat_xyzw[3]
 
-            # --- Path (in map frame, LiDAR poses) ---
-            ps = PoseStamped()
-            ps.header.frame_id = world_frame #map_frame
-            ps.header.stamp = stamp_msg
-            ps.pose.position.x = lidar_xyz[0]
-            ps.pose.position.y = lidar_xyz[1]
-            ps.pose.position.z = lidar_xyz[2]
-            ps.pose.orientation.x = lidar_quat_xyzw[0]
-            ps.pose.orientation.y = lidar_quat_xyzw[1]
-            ps.pose.orientation.z = lidar_quat_xyzw[2]
-            ps.pose.orientation.w = lidar_quat_xyzw[3]
+                path_msg.poses.append(ps)
+                path_msg.header.stamp = stamp_msg
+                
+                writer.write(path_topic, serialize_message(path_msg), stamp_ns)
 
-            path_msg.poses.append(ps)
-            path_msg.header.stamp = stamp_msg
-            
-            writer.write(path_topic, serialize_message(path_msg), stamp_ns)
-
-            # --- TF ---
+            # # --- TF ---
             # # world -> map (static)
             # tf_world_map = TransformStamped()
             # tf_world_map.header.frame_id = world_frame
