@@ -1,0 +1,7 @@
+name: cumulti_UI
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.18
+prefix: /home/donceykong/miniconda3/envs/cumulti_UI
