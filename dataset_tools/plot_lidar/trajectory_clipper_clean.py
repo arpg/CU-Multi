@@ -348,6 +348,7 @@ def main():
         colors[name] = col
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyleSheet("QWidget { background-color: white; }")
     win = MultiTrajectoryClipper(robots, colors)
     win.show()
     sys.exit(app.exec())
