@@ -1,12 +1,31 @@
 # The CU-Multi Dataset
 <p align="center">
-  <img src="./assets/banner_light.png" alt="banner" height="400">
+  <img src="./assets/main.png" alt="banner">
 </p>
 
 The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-robot place recognition and loop-closure detection.
 
 ## Download Dataset
 **If you would like to download the dataset, you can do so [here](https://app.globus.org/file-manager?origin_id=ae3a873e-d159-4e7b-8a57-9be2699eea52&origin_path=%2F).** A Globus account is required, which you can create using either your institutional or personal email address.
+
+CU-Multi/
+├── calib/
+│   └── description/
+│       ├── meshes/
+│       │   ├── cu_hunter_body.dae
+│       │   └── cu_hunter_wheel.dae
+│       └── robot.urdf
+├── <environment>/
+│   ├── <env>.osm.xml
+│   └── <robot>/
+│       ├── <robot>_gt_utm_poses.csv
+│       ├── <robot>-<env>_cam_rgb/...
+│       ├── <robot>-<env>_cam_depth/...
+│       ├── <robot>-<env>_imu_gps/...
+│       ├── <robot>-<env>_poses/...
+│       └── <robot>-<env>_lidar/
+│           ├── metadata.yaml
+│           └── <robot>-<env>_lidar_0.db3
 
 ## Dataset Updates
 
