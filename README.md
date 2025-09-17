@@ -8,39 +8,37 @@ The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-
 ## Download Dataset
 **If you would like to download the dataset, you can do so [here](https://app.globus.org/file-manager?origin_id=ae3a873e-d159-4e7b-8a57-9be2699eea52&origin_path=%2F).** A Globus account is required, which you can create using either your institutional or personal email address.
 
-CU-Multi/
-├── calib/
-│   └── description/
-│       ├── meshes/
-│       │   ├── cu_hunter_body.dae
-│       │   └── cu_hunter_wheel.dae
-│       └── robot.urdf
-├── <environment>/
-│   ├── <env>.osm.xml
-│   └── <robot>/
-│       ├── <robot>_gt_utm_poses.csv
-│       ├── <robot>-<env>_cam_rgb/...
-│       ├── <robot>-<env>_cam_depth/...
-│       ├── <robot>-<env>_imu_gps/...
-│       ├── <robot>-<env>_poses/...
-│       └── <robot>-<env>_lidar/
-│           ├── metadata.yaml
-│           └── <robot>-<env>_lidar_0.db3
+
+<p align="center">
+  <img src="./assets/FileStructure.png" alt="banner" width="35%" style="vertical-align: top;">
+  <img src="./assets/topics_rostypes_and_sensors.png" alt="banner" width="64%" style="vertical-align: top;">
+</p>
 
 ## Dataset Updates
 
-We are actively working on refining CU-MULTI. This section tracks major updates and upcoming additions.
+## ROS2 topics, message types, and associated sensors
 
-| **Update**                                                                          | **Completion Date** | 
-|-------------------------------------------------------------------------------------|---------------------|
-| Initial dataset release                                                             | 2025-05-19 |
-| Created Updates bulliten                                                            | 2025-05-30 |
-| Calibration files, camera data, and IMU data added to dataset                       | |
-| Replace `pointclouds/` with `data/` folder naming                                   | |
-| Ensure only a single pose file exists for simplicity                                | |
-| Compress directories at the sensor-level                                            | |
-| Update README with images containing sensor extrinsics                              | |
-| Add log file to repo for codebase and dataset release history with V1.0 release!    | |
+| Topic Name                     | Message Type                          | Sensor | Publish Rate        | Description                     |
+|--------------------------------|---------------------------------------|--------|-------------|--------------------------------------|
+|***\<robot\>_\<env\>_ground_truth.db3***|                               |        |        |                                      |
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<robot>/ground_truth/path`    | nav_msgs/msg/Path                     | -      | -      | .                                    |
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<robot>/ground_truth/odometry`| nav_msgs/msg/Odometry                 | -      | 20 Hz  | .                                    |
+|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`/tf`                          | tf2_msgs/msg/TFMessage                | -      | 20 Hz  |Publishes tf from 'world' frame to robot lidar frame 'robot_ouster_os' at each lidar timestamp.|
+| **\<robot\>_\<env\>_lidar.db3**|                                       ||||
+| `<robot>/ouster/metadata`      | std_msgs/msg/String                   | LiDAR  | -      | .                                    |
+|`<robot>/ouster/points`        | sensor_msgs/msg/PointCloud2           | LiDAR  | 20 Hz  | .                                    |
+|`<robot>/ouster/imu`           | sensor_msgs/msg/Imu                   | LiDAR  | 100 Hz | .                                    |
+| **\<robot\>_\<env\>_imu_gps.db3**  |||||
+| `<robot>/imu/mag`              | sensor_msgs/msg/MagneticField         | IMU    | 500 Hz | .                                    |
+| `<robot>/imu/data`             | sensor_msgs/msg/Imu                   | IMU    | 500 Hz | Raw IMU measurements.                |
+| `<robot>/imu/pressure`         | sensor_msgs/msg/FluidPressure         | IMU    | 500 Hz | Air pressure measurements.           |
+| `<robot>/gnss_1/llh_position`  | sensor_msgs/msg/NavSatFix             | GPS    | 2 Hz   | .                                    |
+| `<robot>/gnss_2/llh_position`  | sensor_msgs/msg/NavSatFix             | GPS    | 2 Hz   | .                                    |
+| **\<robot\>_\<env\>_camera_rgb.db3** |||||
+| `<robot>/camera/color/camera_info` | sensor_msgs/msg/CameraInfo        | RGB-D  | 10 Hz  | Camera intrinsic/distortion parameters. |
+| `<robot>/camera/color/image_raw`   | sensor_msgs/msg/Image              | RGB-D  | 10 Hz  | Images captured by front camera.     |
+| `<robot>/camera/color/metadata`    | realsense2_camera/msg/Metadata     | RGB-D  | 10 Hz  | ._
+
 
 We’ll keep this section updated as the dataset evolves. Feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
 
