@@ -28,11 +28,11 @@ def merge_bags(input_paths, output_path):
     )
     writer.open(out_storage, conv_opts)
 
-    # ← NEW: collect and register *all* topics from all bags
+    # collect and register *all* topics from all bags
     topic_map = {}
-    for _, topics_and_types in readers:               # each topics_and_types is a list of metadata
+    for _, topics_and_types in readers: # each topics_and_types is a list of metadata
         for topic in topics_and_types:
-            topic_map[topic.name] = topic             # overrides duplicates by name
+            topic_map[topic.name] = topic # overrides duplicates by name
 
     for topic_meta in topic_map.values():
         writer.create_topic(topic_meta)

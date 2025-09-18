@@ -27,7 +27,7 @@ def merge_ros2_bags(ros2_bags, output_bag: str, storage_id: str = 'sqlite3'):
         )
         for info in reader.get_all_topics_and_types():
             topic_types[info.name] = info.type
-        reader.close()
+        # reader.close()
 
     # --- STEP 3: open all readers and prime first messages
     print("\n\n 3. PRIMING.")
@@ -60,11 +60,11 @@ def merge_ros2_bags(ros2_bags, output_bag: str, storage_id: str = 'sqlite3'):
     for idx, (topic_name, msg_type) in enumerate(topic_types.items()):
         writer.create_topic(
             TopicMetadata(
-                idx,
+                # idx,
                 topic_name,
                 msg_type,
                 out_conv.output_serialization_format,
-                []
+                # []
             )
         )
 
@@ -82,9 +82,9 @@ def merge_ros2_bags(ros2_bags, output_bag: str, storage_id: str = 'sqlite3'):
             topic, data, ts = rdr.read_next()
             heapq.heappush(heap, (ts, idx, topic, data))
 
-    # --- CLEANUP
-    for rdr in readers:
-        rdr.close()
+    # # --- CLEANUP
+    # for rdr in readers:
+    #     rdr.close()
     writer.close()
 
     print(f"✅ Merged {count} messages into '{output_bag}' in chronological order.")
@@ -101,12 +101,12 @@ if __name__ == '__main__':
         )
     print("CU_MULTI_ROOT is:", DATA_ROOT)
 
-    env = "kittredge_loop"
-    robots = [1, 2, 3, 4]
+    env = "main_campus"
+    robots = [1, 2]
 
     CREATE_ROBOT_BAG = False
     CREATE_ENV_BAG = True
-    SENSORS = ["lidar", "poses_CSV"] # [lidar, poses, rgb, depth, gps]
+    SENSORS = ["lidar", "gt_rel_poses"] # [lidar, poses, rgb, depth, gps]
 
     if CREATE_ENV_BAG:
         env_bags = []
