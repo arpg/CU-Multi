@@ -5,6 +5,9 @@ dataset_tools/ros2/cu_multi_ros2_ws/build
 dataset_tools/ros2/cu_multi_ros2_ws/install
 dataset_tools/ros2/cu_multi_ros2_ws/log
 
+# Large DAE file
+dataset_tools/ros2/cu_multi_ros2_ws/src/cu_multi_ros2/urdf/meshes/dae/hunterColor.dae
+
 # MACOS hidden finder support files
 .DS_Store
 main_campus
