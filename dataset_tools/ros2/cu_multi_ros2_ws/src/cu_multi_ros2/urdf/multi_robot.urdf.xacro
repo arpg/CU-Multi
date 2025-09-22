@@ -139,7 +139,7 @@
       <visual>
         <origin xyz="0 ${lr_reflect*(axle_length-(tire_width/2-hex_hub_depth))} 0" rpy="${degrees_90 + lr_reflect*degrees_90} 0 0"/>
         <geometry>
-		      <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae"  scale="-0.001 0.001 0.001"/>
+		      <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_wheel.dae"  scale="-0.001 0.001 0.001"/>
         </geometry>
         <material name="tire_mat"/>
       </visual>
@@ -147,7 +147,7 @@
       <collision>
         <origin xyz="0 ${lr_reflect*(axle_length-(tire_width/2-hex_hub_depth))} 0"/>
         <geometry>
-          <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+          <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
           <cylinder radius="${tire_dia/2}" length="${tire_width}"/>
         </geometry>
       </collision>
@@ -201,8 +201,8 @@
     <visual>
       <origin xyz="0 0 ${-chassis_height / 2}" rpy="0 0 ${degrees_90}"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="0.0055 0.0055 0.0055"/> -->
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae"  scale="0.0055 0.0055 0.0055"/> -->
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="chassis_mat"/>
     </visual>
@@ -210,7 +210,7 @@
     <collision>
       <origin xyz="0 0 ${-chassis_height / 2}"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae"  scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
 
@@ -248,7 +248,7 @@
     <visual>
         <origin xyz="-0.045 0.04 ${-ouster_height/2}" rpy="${degrees_90} 0 ${degrees_90}"/>
         <geometry>
-          <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/os_sensor.dae"  scale="-0.001 0.001 0.001"/>
+          <mesh filename="package://cu_multi_ros/urdf/meshes/dae/os_sensor.dae"  scale="-0.001 0.001 0.001"/>
         </geometry>
         <material name="chassis_mat"/>
       </visual>
@@ -306,7 +306,7 @@
     <visual>
         <origin xyz="0.00 0.00 0.00" rpy="${degrees_90} 0 ${degrees_90}"/>
         <geometry>
-          <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/d435.dae"  scale="1.0 1.0 1.0"/>
+          <mesh filename="package://cu_multi_ros/urdf/meshes/dae/d435.dae"  scale="1.0 1.0 1.0"/>
         </geometry>
       </visual>
 

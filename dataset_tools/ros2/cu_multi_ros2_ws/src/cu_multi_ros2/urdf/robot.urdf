@@ -32,15 +32,15 @@
     <visual>
       <origin rpy="0 0 1.57079633" xyz="0 0 -0.1"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae"  scale="0.0055 0.0055 0.0055"/> -->
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae" scale="1.0 1.0 1.0"/>
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae"  scale="0.0055 0.0055 0.0055"/> -->
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae" scale="1.0 1.0 1.0"/>
       </geometry>
       <material name="chassis_mat"/>
     </visual>
     <collision>
       <origin xyz="0 0 -0.1"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_base.dae" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_base.dae" scale="1.0 1.0 1.0"/>
       </geometry>
     </collision>
     <inertial>
@@ -74,7 +74,7 @@
     <visual>
       <origin rpy="1.57079633 0 1.57079633" xyz="-0.045 0.04 -0.0371"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/os_sensor.dae" scale="-0.001 0.001 0.001"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/os_sensor.dae" scale="-0.001 0.001 0.001"/>
       </geometry>
       <material name="chassis_mat"/>
     </visual>
@@ -125,7 +125,7 @@
     <visual>
       <origin rpy="1.57079633 0 1.57079633" xyz="0.00 0.00 0.00"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/d435.dae" scale="1.0 1.0 1.0"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/d435.dae" scale="1.0 1.0 1.0"/>
       </geometry>
     </visual>
     <collision>
@@ -207,14 +207,14 @@
     <visual>
       <origin rpy="3.14159266 0 0" xyz="0 -0.00011000000000000593 0"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
       </geometry>
       <material name="tire_mat"/>
     </visual>
     <collision>
       <origin xyz="0 -0.00011000000000000593 0"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
         <cylinder length="0.08912" radius="0.1375"/>
       </geometry>
     </collision>
@@ -255,14 +255,14 @@
     <visual>
       <origin rpy="0.0 0 0" xyz="0 0.00011000000000000593 0"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
       </geometry>
       <material name="tire_mat"/>
     </visual>
     <collision>
       <origin xyz="0 0.00011000000000000593 0"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
         <cylinder length="0.08912" radius="0.1375"/>
       </geometry>
     </collision>
@@ -292,14 +292,14 @@
     <visual>
       <origin rpy="3.14159266 0 0" xyz="0 -0.00011000000000000593 0"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
       </geometry>
       <material name="tire_mat"/>
     </visual>
     <collision>
       <origin xyz="0 -0.00011000000000000593 0"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
         <cylinder length="0.08912" radius="0.1375"/>
       </geometry>
     </collision>
@@ -329,14 +329,14 @@
     <visual>
       <origin rpy="0.0 0 0" xyz="0 0.00011000000000000593 0"/>
       <geometry>
-        <mesh filename="package://lidar2osm_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
+        <mesh filename="package://cu_multi_ros/urdf/meshes/dae/hunter_wheel.dae" scale="-0.001 0.001 0.001"/>
       </geometry>
       <material name="tire_mat"/>
     </visual>
     <collision>
       <origin xyz="0 0.00011000000000000593 0"/>
       <geometry>
-        <!-- <mesh filename="package://lidar2osm_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
+        <!-- <mesh filename="package://cu_multi_ros/urdf/meshes/back-wheel-no-axel_c.stl"  scale="-0.001 0.001 0.001"/> -->
         <cylinder length="0.08912" radius="0.1375"/>
       </geometry>
     </collision>

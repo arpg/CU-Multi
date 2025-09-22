@@ -48,7 +48,7 @@ def generate_launch_description():
         ld.add_action(robot_lidar_bag_play)
 
         # robot_map_accumulator_node = Node(
-        #     package='lidar2osm_ros',
+        #     package='cu_multi_ros',
         #     executable='robot_map_accumulator',
         #     arguments=[robot_name],  # Pass the robot name as an argument
         # )
@@ -60,7 +60,7 @@ def generate_launch_description():
         package='rviz2', executable='rviz2', name='rviz2',
         output='screen',
         arguments=['-d', PathJoinSubstitution([
-            FindPackageShare('lidar2osm_ros'), 'rviz', 'play_cam.rviz'
+            FindPackageShare('cu_multi_ros'), 'rviz', 'play_cam.rviz'
         ])]
     )
     ld.add_action(TimerAction(period=5.0, actions=[rviz]))
