@@ -280,7 +280,7 @@ def clip_ros2_bag_dir(in_dir: str,
     topic_type_map = {}
     for md in topics_and_types:
         writer.create_topic(TopicMetadata(
-            id = 0,
+            # id = 0,
             name=md.name, 
             type=md.type,
             serialization_format='cdr',
