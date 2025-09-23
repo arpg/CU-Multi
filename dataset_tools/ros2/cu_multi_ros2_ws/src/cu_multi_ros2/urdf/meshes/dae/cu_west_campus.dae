@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 3.3.1 commit date:2022-10-04, commit time:18:35, hash:b292cfe5a936</authoring_tool>
+    </contributor>
+    <created>2023-10-06T16:23:19</created>
+    <modified>2023-10-06T16:23:19</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_effects>
+    <effect id="cu_clipped-effect">
+      <profile_COMMON>
+        <newparam sid="cu_clipped_png-surface">
+          <surface type="2D">
+            <init_from>cu_clipped_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="cu_clipped_png-sampler">
+          <sampler2D>
+            <source>cu_clipped_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <lambert>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <diffuse>
+              <texture texture="cu_clipped_png-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <index_of_refraction>
+              <float sid="ior">1.45</float>
+            </index_of_refraction>
+          </lambert>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_images>
+    <image id="cu_clipped_png" name="cu_clipped_png">
+	    <init_from>cu_clipped.png</init_from>
+    </image>
+  </library_images>
+  <library_materials>
+    <material id="cu_clipped-material" name="cu_clipped">
+      <instance_effect url="#cu_clipped-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="cu_clipped-mesh" name="cu_clipped">
+      <mesh>
+        <source id="cu_clipped-mesh-positions">
+          <float_array id="cu_clipped-mesh-positions-array" count="12">-0.6555698 -0.5 0 0.6555698 -0.5 0 -0.6555698 0.5 0 0.6555698 0.5 0</float_array>
+          <technique_common>
+            <accessor source="#cu_clipped-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="cu_clipped-mesh-normals">
+          <float_array id="cu_clipped-mesh-normals-array" count="3">0 0 1</float_array>
+          <technique_common>
+            <accessor source="#cu_clipped-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="cu_clipped-mesh-map-0">
+          <float_array id="cu_clipped-mesh-map-0-array" count="12">1 0 0 1 0 0 1 0 1 1 0 1</float_array>
+          <technique_common>
+            <accessor source="#cu_clipped-mesh-map-0-array" count="6" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="cu_clipped-mesh-vertices">
+          <input semantic="POSITION" source="#cu_clipped-mesh-positions"/>
+        </vertices>
+        <triangles material="cu_clipped-material" count="2">
+          <input semantic="VERTEX" source="#cu_clipped-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#cu_clipped-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#cu_clipped-mesh-map-0" offset="2" set="0"/>
+          <p>1 0 0 2 0 1 0 0 2 1 0 3 3 0 4 2 0 5</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="cu_clipped" name="cu_clipped" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#cu_clipped-mesh" name="cu_clipped">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="cu_clipped-material" target="#cu_clipped-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

@@ -297,7 +297,7 @@ class ROS2BagCreator():
             msg_time_ns = int(timestamp * int(1e9))
             self.write_single_pointcloud(pc_topic_name, pc_bin_file, header_time_ns, msg_time_ns, pc_frame_id)
 
-            pc_label_bin_file = os.path.join(self.lidar_dir, "labels", f"lidar_pointcloud_{idx}.bin")
+            pc_label_bin_file = os.path.join(self.lidar_dir, "labels/gt_osm_labels", f"lidar_pointcloud_{idx}.bin")
             quaternion_tf = quat_poses_list[idx]
             tf = quaternion_pose_to_4x4(quaternion_tf[:3], quaternion_tf[3:])
             # self.write_single_semantic_pointcloud(sem_pc_topic_name, pc_bin_file, pc_label_bin_file, header_time_ns, msg_time_ns, sem_pc_frame_id, tf)
@@ -338,7 +338,9 @@ class ROS2BagCreator():
         semantic_point_cloud_data = np.hstack([point_cloud_data, labels_rgb])
 
         desired_semantic_indices = np.where((labels_np == 45) | (labels_np == 46))[0]
-        semantic_point_cloud_data = semantic_point_cloud_data[desired_semantic_indices, :]
+        # semantic_point_cloud_data = semantic_point_cloud_data[desired_semantic_indices, :]
+
+
 
         # max_points_per_scan = 500
         # downsampled_indices = np.random.choice(len(semantic_point_cloud_data), max_points_per_scan, replace=False)
@@ -420,10 +422,10 @@ def main(args=None):
     rclpy.init(args=args)
 
     # Path to root of CU-MULTI Dataset directory
-    dataset_root_dir = '/root/Datasets/cu_multi'
+    dataset_root_dir = '/media/donceykong/donceys_data_ssd/datasets/CU_MULTI/data/'
     environment = "kittredge_loop"
-    robot_num = "1"
-    out_dir = f"{dataset_root_dir}"
+    robot_num = "4"
+    out_dir = "/media/donceykong/doncey_ssd_011/datasets/CU_MULTI/ros2_bags" #f"{dataset_root_dir}"
 
     ROS2BagCreator(dataset_root_dir, environment, robot_num, out_dir)
 
