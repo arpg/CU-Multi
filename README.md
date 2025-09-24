@@ -58,16 +58,21 @@ CU-Multi/
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<robot>/camera/depth/image_raw` | sensor_msgs/msg/Image  | RGB-D  | 10 Hz | Images captured by front camera. |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`<robot>/camera/depth/metadata` | realsense2_camera/msg/Metadata | RGB-D | 10 Hz | ._ |
 
-We’ll keep this section updated as the dataset evolves. Feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
+## Included Tools
+We have included multiple tools to help researchers begin using CU-Multi. These include:
 
-## Converting to ROS1/ROS2 bag formats
+- Coverting from ROS1/ROS2 to KITTI-Style data
+- A ROS2 Trajectory Clipper tool
+
+
+### Converting ROS1/ROS2 bag formats to KITTI-Style Dataset
 *Please Note*: The order of this is likely to change with a cleaner layout, but this will quickly get you started. 
 
 To convert the dataset to ROS1 bag files, you can use the provided Docker containers in the **dataset_tools** directory following the steps below. Before proceeding further, please make sure you have Docker installed. You can install Docker following the instructions at [this link](https://docs.docker.com/engine/install/).
 
 Update the ***SCRIPTS_DIR*** and ***DATASETS_DIR*** variables ***run_and_enter_container.sh*** bash script with the path of the ***conversion_scripts*** directory (there's one in the ros1 and ros2 folders) you will be using and where you have saved the CU-Multi dataset, respectively. 
 
-### Convert to ROS1 rosbag format
+#### Convert to ROS1 rosbag format
 
 Install and enter the Docker container
 1. > cd dataset_tools
@@ -84,7 +89,7 @@ Now run the Python file with:
 
 > python3 make_ros1_bag.py. 
 
-### Convert to ROS2 rosbag format
+#### Convert to ROS2 rosbag format
 
 Install and enter the Docker container
 1. > cd dataset_tools
@@ -99,3 +104,14 @@ First, edit the Python file with the environment and corresponding robot you wou
 Now run the Python file with:
 
 > python3 make_ros2_bag.py. 
+
+### Trajectory Clipper Tool
+
+If you would like to get started using the  Trajectory Clipper tool, please note that we only have a working version for ROS2 at the moment.  
+
+## Presentation
+<iframe src="https://o365coloradoedu-my.sharepoint.com/personal/doal8589_colorado_edu/_layouts/15/Doc.aspx?sourcedoc={60782fab-242d-4659-89a0-eed9d7f09c33}&amp;action=embedview&amp;wdAr=1.7777777777777777" width="476px" height="288px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+
+## Issues
+
+We are working to ensure the usability of the dataset and to ensure seamless integration into existing pipelines. If there are any difficulties, please feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
