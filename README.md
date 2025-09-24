@@ -109,9 +109,6 @@ Now run the Python file with:
 
 If you would like to get started using the  Trajectory Clipper tool, please note that we only have a working version for ROS2 at the moment.  
 
-## Presentation
-<iframe src="https://o365coloradoedu-my.sharepoint.com/personal/doal8589_colorado_edu/_layouts/15/Doc.aspx?sourcedoc={60782fab-242d-4659-89a0-eed9d7f09c33}&amp;action=embedview&amp;wdAr=1.7777777777777777" width="476px" height="288px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
-
 ## Issues
 
 We are working to ensure the usability of the dataset and to ensure seamless integration into existing pipelines. If there are any difficulties, please feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
