@@ -113,7 +113,9 @@ If you would like to get started using the  Trajectory Clipper tool, please note
 
 We are working to ensure the usability of the dataset and to ensure seamless integration into existing pipelines. If there are any difficulties, please feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
 
-# Reference
+# Citation
+
+If you find CU-Multi and/or the provided tools useful in your research, please cite our paper:
 
 ```bibtex
 @misc{albin2025cumultidatasetmultirobotcollaborative,
