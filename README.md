@@ -112,3 +112,16 @@ If you would like to get started using the  Trajectory Clipper tool, please note
 ## Issues
 
 We are working to ensure the usability of the dataset and to ensure seamless integration into existing pipelines. If there are any difficulties, please feel free to [open an issue](https://github.com/arpg/CU-Multi/issues) if anything seems unclear or incomplete.
+
+# Reference
+
+```bibtex
+@misc{albin2025cumultidatasetmultirobotcollaborative,
+      title={CU-Multi: A Dataset for Multi-Robot Collaborative Perception}, 
+      author={Doncey Albin and Daniel McGann and Miles Mena and Annika Thomas and Harel Biggie and Xuefei Sun and Steve McGuire and Jonathan P. How and Christoffer Heckman},
+      year={2025},
+      eprint={2509.19463},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2509.19463}, 
+}
