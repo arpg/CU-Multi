@@ -70,11 +70,13 @@ Update the ***SCRIPTS_DIR*** and ***DATASETS_DIR*** variables ***run_and_enter_c
 ### Convert to ROS1 rosbag format
 
 Install and enter the Docker container
-1. > cd dataset_tools
-2. > cd ros1
-3. > sudo bash docker/build_docker.sh
-4. > sudo bash run_and_enter_container.bash
-5. > source /opt/ros/noetic/setup.bash
+
+```bash
+cd dataset_tools/ros1
+sudo bash docker/build_docker.sh
+sudo bash run_and_enter_container.bash
+source /opt/ros/noetic/setup.bash
+```
 
 While you are in the container, run ***ros_core***. If you want to do this in a tmux session, even better. Open a new window and repeat entering the container like above if not using a tmux session. Now enter ***/root/conversion_scripts*** directory. In this directory is the Python file for converting the unstructured CU-Multi dataset into a ROS1 rosbag file.
 
@@ -82,15 +84,16 @@ First, edit the Python file with the environment and corresponding robot you wou
 
 Now run the Python file with:
 
-> python3 make_ros1_bag.py. 
+```python
+python3 make_ros1_bag.py. 
+```
 
 ### Convert to ROS2 rosbag format
 
 Install and enter the Docker container
 
 ```bash
-cd dataset_tools
-cd ros2
+cd ./dataset_tools/ros2
 sudo bash docker/build_docker.sh
 sudo bash run_and_enter_container.bash
 ```
