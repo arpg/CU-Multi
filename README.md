@@ -84,8 +84,8 @@ First, edit the Python file with the environment and corresponding robot you wou
 
 Now run the Python file with:
 
-```python
-python3 make_ros1_bag.py. 
+```bash
+python3 make_ros1_bag.py 
 ```
 
 ### Convert to ROS2 rosbag format
@@ -105,7 +105,7 @@ First, edit the Python file with the environment and corresponding robot you wou
 Now run the Python file with:
 
 ```bash
-python3 make_ros2_bag.py. 
+python3 make_ros2_bag.py 
 ```
 
 # Citation
