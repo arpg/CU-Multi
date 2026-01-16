@@ -8,22 +8,6 @@ The CU-MULTI Dataset: A dataset aimed to support multi-robot map-merging, inter-
 ## Download Dataset
 **If you would like to download the dataset, you can do so [here](https://app.globus.org/file-manager?origin_id=ae3a873e-d159-4e7b-8a57-9be2699eea52&origin_path=%2F).** A Globus account is required, which you can create using either your institutional or personal email address.
 
-# Citation
-
-If you find CU-Multi and/or the provided tools useful in your research, please cite our paper:
-
-```bibtex
-@misc{albin2025cumultidatasetmultirobotcollaborative,
-      title={CU-Multi: A Dataset for Multi-Robot Collaborative Perception}, 
-      author={Doncey Albin and Daniel McGann and Miles Mena and Annika Thomas and Harel Biggie and Xuefei Sun and Steve McGuire and Jonathan P. How and Christoffer Heckman},
-      year={2025},
-      eprint={2509.19463},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO},
-      url={https://arxiv.org/abs/2509.19463}, 
-}
-```
-
 # Dataset File Structure
 
 ```
@@ -115,3 +99,19 @@ First, edit the Python file with the environment and corresponding robot you wou
 Now run the Python file with:
 
 > python3 make_ros2_bag.py. 
+
+# Citation
+
+We hope you find CU-Multi and/or the provided tools useful in your research. Our preprint paper can be cited using the bibtex format below:
+
+```bibtex
+@misc{albin2025cumultidatasetmultirobotcollaborative,
+      title={CU-Multi: A Dataset for Multi-Robot Collaborative Perception}, 
+      author={Doncey Albin and Daniel McGann and Miles Mena and Annika Thomas and Harel Biggie and Xuefei Sun and Steve McGuire and Jonathan P. How and Christoffer Heckman},
+      year={2025},
+      eprint={2509.19463},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      url={https://arxiv.org/abs/2509.19463}, 
+}
+```
