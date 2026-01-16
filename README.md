@@ -87,10 +87,13 @@ Now run the Python file with:
 ### Convert to ROS2 rosbag format
 
 Install and enter the Docker container
-1. > cd dataset_tools
-2. > cd ros2
-3. > sudo bash docker/build_docker.sh
-4. > sudo bash run_and_enter_container.bash
+
+```bash
+cd dataset_tools
+cd ros2
+sudo bash docker/build_docker.sh
+sudo bash run_and_enter_container.bash
+```
 
 Enter the ***/root/conversion_scripts*** directory. In this directory is the Python file for converting the unstructured CU-Multi dataset into a ROS2 db3 file.
 
@@ -98,7 +101,9 @@ First, edit the Python file with the environment and corresponding robot you wou
 
 Now run the Python file with:
 
-> python3 make_ros2_bag.py. 
+```bash
+python3 make_ros2_bag.py. 
+```
 
 # Citation
 
